@@ -1,0 +1,14 @@
+[project]
+name = "modern_robotics_learning"
+version = "0.1.0"
+description = "Self Learning Materials of Modern Robotics"
+readme = "README.md"
+dependencies = [
+    "matplotlib==3.7",
+    "numpy<2",
+    "roboticstoolbox-python>=1.1.1",
+]
+
+[[tool.uv.index]]
+url = "https://mirrors.aliyun.com/pypi/simple"
+default = true
