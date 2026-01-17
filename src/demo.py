@@ -1,52 +1,26 @@
 import roboticstoolbox as rtb
-from spatialmath import SE3
 import swift
-import roboticstoolbox as rtb
 import spatialmath as sm
 import numpy as np
+from spatialmath import SE3
 
 
 def demo_1():
     robot = rtb.models.Panda()
-    print(robot)
-    Tep = SE3.Trans(0.6, -0.3, 0.1) * SE3.OA([0, 1, 0], [0, 0, -1])
-    sol = robot.ik_LM(Tep)  # solve IK
-    print(sol)
-    q_pickup = sol[0]
-    print(robot.fkine(q_pickup))  # FK shows that desired end-effector pose was achieved
-
-    # robot.plot(qt.q, backend='pyplot', movie="1.gif")
-    qt = rtb.jtraj(robot.qr, q_pickup, 100)
-    robot.plot(qt.q)
-
-
-def demo_swift():
-    # 1. 初始化机器人
-    robot = rtb.models.Panda()
-    robot.q = robot.qr  # 设置初始关节角度
-
-    # 2. 初始化 Swift 仿真器
+    robot.q = robot.qr
     env = swift.Swift()
-    env.launch(realtime=True)  # 在浏览器中打开仿真界面
-
-    # 3. 将机器人添加到仿真环境
+    env.launch(realtime=True)
     env.add(robot)
 
-    # 4. 计算目标位姿和逆运动学
     Tep = SE3.Trans(0.6, -0.3, 0.1) * SE3.OA([0, 1, 0], [0, 0, -1])
     sol = robot.ik_LM(Tep)
     q_pickup = sol[0]
+    qt = rtb.jtraj(robot.qr, q_pickup, 1000)
 
-    # 5. 生成轨迹 (50步)
-    qt = rtb.jtraj(robot.qr, q_pickup, 50)
-
-    # 6. 在 Swift 中循环播放轨迹
     for qk in qt.q:
-        robot.q = qk  # 更新机器人关节状态
-        env.step(0.02)  # 步进仿真器（0.02秒即50Hz）
+        robot.q = qk
+        env.step(0.01)
 
-    # 保持窗口开启
-    env.hold()
 
 
 def demo_2():
@@ -61,18 +35,69 @@ def demo_2():
     arrived = False
     env.add(panda)
 
-    dt = 0.05
-
+    dt = 0.01
     while not arrived:
-
         v, arrived = rtb.p_servo(panda.fkine(panda.q), Tep, 1)
         panda.qd = np.linalg.pinv(panda.jacobe(panda.q)) @ v
         env.step(dt)
 
-    env.hold()
+
+
+def plot_robot_trajectory(
+    start_point: tuple,
+    end_point: tuple,
+):
+    """
+    Plot robot trajectory from start point to end point in 3D space.
+
+    Args:
+        start_point: Tuple of (x, y, z) coordinates for the starting position.
+        end_point: Tuple of (x, y, z) coordinates for the ending position.
+        degrees_of_freedom: Number of active joints (default: 7 for full Panda).
+
+    Returns:
+        None
+    """
+    robot = rtb.models.Panda()
+
+    # Initialize robot to ready position
+    robot.q = robot.qr
+
+    # Setup Swift environment
+    env = swift.Swift()
+    env.launch(realtime=True)
+    env.add(robot)
+
+    # Create target transformation for end point
+    Tep = SE3.Trans(*end_point) * SE3.OA([0, 1, 0], [0, 0, -1])
+
+    # Calculate inverse kinematics for target position
+    sol = robot.ik_LM(Tep)
+    if not sol:
+        raise ValueError("无法求解逆运动学，目标位置可能不可达")
+
+    q_target = sol[0]
+
+    # Calculate inverse kinematics for start position
+    T_start = SE3.Trans(*start_point) * SE3.OA([0, 1, 0], [0, 0, -1])
+    sol_start = robot.ik_LM(T_start)
+    if not sol_start:
+        raise ValueError("无法求解起始位置逆运动学，起始位置可能不可达")
+
+    q_start = sol_start[0]
+    # Generate joint trajectory
+    qt = rtb.jtraj(q_start, q_target, 500)
+
+    # Animate robot motion along trajectory
+    for qk in qt.q:
+        robot.q = qk
+        env.step(0.01)
 
 
 if __name__ == "__main__":
-    # demo_swift()
     # demo_1()
-    demo_2()
+    # demo_2()
+    plot_robot_trajectory(
+      start_point=(0.4, 0.2, 0.3),
+      end_point=(0.7, -0.2, 0.4),
+  )
