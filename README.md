@@ -10,4 +10,4 @@ Personal learning notes and code implementation for "Modern Robotics: Mechanics,
 
 ## Notes
 
-To be finished in the future
+Updating Lecture notes for **AI-2802**, Introduction to Robotics.
