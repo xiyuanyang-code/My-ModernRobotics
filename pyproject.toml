@@ -3,9 +3,10 @@ name = "modern_robotics_learning"
 version = "0.1.0"
 description = "Self Learning Materials of Modern Robotics"
 readme = "README.md"
+requires-python = ">=3.10"
 dependencies = [
-    "matplotlib==3.7",
-    "numpy<2",
+    "matplotlib>=3.10.8",
+    "numpy>=2.2.6",
     "roboticstoolbox-python>=1.1.1",
 ]
 

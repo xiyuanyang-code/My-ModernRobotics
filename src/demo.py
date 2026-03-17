@@ -98,6 +98,6 @@ if __name__ == "__main__":
     # demo_1()
     # demo_2()
     plot_robot_trajectory(
-      start_point=(0.4, 0.2, 0.3),
-      end_point=(0.7, -0.2, 0.4),
+      start_point=(-1,-2, 8),
+      end_point=(4, 2, 5),
   )
