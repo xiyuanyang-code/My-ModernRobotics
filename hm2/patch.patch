@@ -1,0 +1,3099 @@
+diff --git a/.gitignore b/.gitignore
+new file mode 100644
+index 0000000..3b1643a
+--- /dev/null
++++ b/.gitignore
+@@ -0,0 +1,217 @@
++runs
++sensitivity_results
++
++
++# Created by https://www.toptal.com/developers/gitignore/api/macos,python
++# Edit at https://www.toptal.com/developers/gitignore?templates=macos,python
++
++### macOS ###
++# General
++.DS_Store
++.AppleDouble
++.LSOverride
++
++# Icon must end with two \r
++Icon
++
++
++# Thumbnails
++._*
++
++# Files that might appear in the root of a volume
++.DocumentRevisions-V100
++.fseventsd
++.Spotlight-V100
++.TemporaryItems
++.Trashes
++.VolumeIcon.icns
++.com.apple.timemachine.donotpresent
++
++# Directories potentially created on remote AFP share
++.AppleDB
++.AppleDesktop
++Network Trash Folder
++Temporary Items
++.apdisk
++
++### macOS Patch ###
++# iCloud generated files
++*.icloud
++
++### Python ###
++# Byte-compiled / optimized / DLL files
++__pycache__/
++*.py[cod]
++*$py.class
++
++# C extensions
++*.so
++
++# Distribution / packaging
++.Python
++build/
++develop-eggs/
++dist/
++downloads/
++eggs/
++.eggs/
++lib/
++lib64/
++parts/
++sdist/
++var/
++wheels/
++share/python-wheels/
++*.egg-info/
++.installed.cfg
++*.egg
++MANIFEST
++
++# PyInstaller
++#  Usually these files are written by a python script from a template
++#  before PyInstaller builds the exe, so as to inject date/other infos into it.
++*.manifest
++*.spec
++
++# Installer logs
++pip-log.txt
++pip-delete-this-directory.txt
++
++# Unit test / coverage reports
++htmlcov/
++.tox/
++.nox/
++.coverage
++.coverage.*
++.cache
++nosetests.xml
++coverage.xml
++*.cover
++*.py,cover
++.hypothesis/
++.pytest_cache/
++cover/
++
++# Translations
++*.mo
++*.pot
++
++# Django stuff:
++*.log
++local_settings.py
++db.sqlite3
++db.sqlite3-journal
++
++# Flask stuff:
++instance/
++.webassets-cache
++
++# Scrapy stuff:
++.scrapy
++
++# Sphinx documentation
++docs/_build/
++
++# PyBuilder
++.pybuilder/
++target/
++
++# Jupyter Notebook
++.ipynb_checkpoints
++
++# IPython
++profile_default/
++ipython_config.py
++
++# pyenv
++#   For a library or package, you might want to ignore these files since the code is
++#   intended to run in multiple environments; otherwise, check them in:
++# .python-version
++
++# pipenv
++#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
++#   However, in case of collaboration, if having platform-specific dependencies or dependencies
++#   having no cross-platform support, pipenv may install dependencies that don't work, or not
++#   install all needed dependencies.
++#Pipfile.lock
++
++# poetry
++#   Similar to Pipfile.lock, it is generally recommended to include poetry.lock in version control.
++#   This is especially recommended for binary packages to ensure reproducibility, and is more
++#   commonly ignored for libraries.
++#   https://python-poetry.org/docs/basic-usage/#commit-your-poetrylock-file-to-version-control
++#poetry.lock
++
++# pdm
++#   Similar to Pipfile.lock, it is generally recommended to include pdm.lock in version control.
++#pdm.lock
++#   pdm stores project-wide configurations in .pdm.toml, but it is recommended to not include it
++#   in version control.
++#   https://pdm.fming.dev/#use-with-ide
++.pdm.toml
++
++# PEP 582; used by e.g. github.com/David-OConnor/pyflow and github.com/pdm-project/pdm
++__pypackages__/
++
++# Celery stuff
++celerybeat-schedule
++celerybeat.pid
++
++# SageMath parsed files
++*.sage.py
++
++# Environments
++.env
++.venv
++env/
++venv/
++ENV/
++env.bak/
++venv.bak/
++
++# Spyder project settings
++.spyderproject
++.spyproject
++
++# Rope project settings
++.ropeproject
++
++# mkdocs documentation
++/site
++
++# mypy
++.mypy_cache/
++.dmypy.json
++dmypy.json
++
++# Pyre type checker
++.pyre/
++
++# pytype static type analyzer
++.pytype/
++
++# Cython debug symbols
++cython_debug/
++
++# PyCharm
++#  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
++#  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
++#  and can be added to the global gitignore or merged into this file.  For a more nuclear
++#  option (not recommended) you can uncomment the following to ignore the entire idea folder.
++#.idea/
++
++### Python Patch ###
++# Poetry local configuration file - https://python-poetry.org/docs/configuration/#local-configuration
++poetry.toml
++
++# ruff
++.ruff_cache/
++
++# LSP config files
++pyrightconfig.json
++
++# End of https://www.toptal.com/developers/gitignore/api/macos,python
++HM.md 
++paper.tex
++results
++iLQR_math.md
+\ No newline at end of file
+diff --git a/CartPole-v0_weights.h5f b/CartPole-v0_weights.h5f
+deleted file mode 100644
+index d8fd5f1..0000000
+Binary files a/CartPole-v0_weights.h5f and /dev/null differ
+diff --git a/README.md b/README.md
+new file mode 100644
+index 0000000..e69de29
+diff --git a/cartpole_entry.py b/cartpole_entry.py
+index 97465a6..2cd6193 100644
+--- a/cartpole_entry.py
++++ b/cartpole_entry.py
+@@ -2,6 +2,7 @@ import argparse
+ import json
+ import os
+ from dataclasses import asdict, dataclass
++from datetime import datetime
+ 
+ import imageio.v2 as imageio
+ import matplotlib.pyplot as plt
+@@ -11,7 +12,7 @@ from robotics_control.cartpole import (
+     make_cartpole_env_from_config,
+     reset_cartpole_with_random_state,
+ )
+-from robotics_control.pid import PIDController
++from robotics_control.pid import CartPolePIDController
+ 
+ USE_RANDOM_INIT = True
+ RANDOM_X_RANGE = (-0.4, 0.4)
+@@ -22,32 +23,39 @@ DEFAULT_DT = 0.02
+ DEFAULT_MAX_STEPS = 1000
+ 
+ 
+-def _safe_reset(env):
+-    out = env.reset()
+-    if isinstance(out, tuple):
+-        return out[0]
+-    return out
++def _safe_reset(env, seed=None):
++    obs, info = env.reset(seed=seed)
++    return obs
+ 
+ 
+ def _safe_step(env, action):
+-    out = env.step(action)
+-    if len(out) == 5:
+-        obs, reward, terminated, truncated, info = out
+-        done = bool(terminated or truncated)
+-        return obs, reward, done, info
+-    obs, reward, done, info = out
++    obs, reward, terminated, truncated, info = env.step(action)
++    done = bool(terminated or truncated)
+     return obs, reward, done, info
+ 
+ 
+ @dataclass
+ class PIDParams:
+     """
+-    Parameters for the PID controller.
++    Parameters for the CartPole PID controller.
++
++    Gains for angle loop (theta) and cart centering loop (x).
++    Tuning order:
++      1. Set theta_kp / theta_kd first (primary stabilization).
++      2. Add small x_kp / x_kd for centering.
++      3. Add tiny integral terms only if persistent bias remains.
++      4. Increase hysteresis if action switches too frequently.
+     """
+ 
+-    mock_param: float
+-
+-    pass
++    theta_kp: float = 50.0
++    theta_kd: float = 20.0
++    theta_ki: float = 0.0
++    x_kp: float = 2.0
++    x_kd: float = 3.0
++    x_ki: float = 0.0
++    force_limit: float = 10.0
++    integral_limit: float = 5.0
++    hysteresis: float = 0.5
+ 
+ 
+ @dataclass
+@@ -62,80 +70,245 @@ class EpisodeResult:
+     final_obs: list[float]
+ 
+ 
+-def _plot_rollout(
+-    time_s, state_history, force_history, action_history, save_path, title
+-):
++def _smooth_signal(signal, window=15):
++    """Apply moving average smoothing to a signal."""
++    if len(signal) < window:
++        return signal
++    kernel = np.ones(window) / window
++    smoothed = np.convolve(signal, kernel, mode="same")
++    # Fix edges
++    smoothed[: window // 2] = signal[: window // 2]
++    smoothed[-(window // 2) :] = signal[-(window // 2) :]
++    return smoothed
++
++
++def _compute_energy(states, m_cart=1.0, m_pole=0.1, l=0.5, g=9.81):
++    """Compute kinetic + potential energy (simplified)."""
++    x_dot = states[:, 1]
++    theta = states[:, 2]
++    theta_dot = states[:, 3]
++    # Simplified energy: KE from cart + pole angular, PE from pole height
++    ke = 0.5 * m_cart * x_dot**2 + 0.5 * m_pole * (l * theta_dot) ** 2
++    pe = m_pole * g * l * (1 - np.cos(theta))
++    return ke + pe
++
++
++def _compute_switch_rate(actions, window=10):
++    """Compute action switch rate in a sliding window."""
++    switches = np.abs(np.diff(actions)) > 0.5
++    rate = np.convolve(switches, np.ones(window) / window, mode="same")
++    return rate
++
++
++def _plot_cart_state(time_s, states, save_path):
++    """Plot cart position and velocity."""
++    x = states[:, 0]
++    x_dot = states[:, 1]
++
++    fig, ax = plt.subplots(figsize=(6, 6))
++    ax.plot(time_s, x, color="tab:blue", linewidth=0.5, alpha=0.3)
++    ax.plot(time_s, x_dot, color="tab:orange", linewidth=0.5, alpha=0.3)
++    ax.plot(time_s, _smooth_signal(x), color="tab:blue", linewidth=2.5, label="x (m)")
++    ax.plot(time_s, _smooth_signal(x_dot), color="tab:orange", linewidth=2.5, label=r"$\dot{x}$ (m/s)")
++    ax.set_xlabel("Time (s)")
++    ax.set_ylabel("Cart State")
++    ax.set_title("Cart State")
++    ax.legend()
++    ax.grid(True, alpha=0.3)
++    fig.tight_layout()
++    fig.savefig(save_path, dpi=150, format="pdf")
++    plt.close(fig)
++
++
++def _plot_pole_state(time_s, states, save_path):
++    """Plot pole angle and angular velocity."""
++    theta = states[:, 2]
++    theta_dot = states[:, 3]
++
++    fig, ax = plt.subplots(figsize=(6, 6))
++    ax.plot(time_s, theta, color="tab:green", linewidth=0.5, alpha=0.3)
++    ax.plot(time_s, theta_dot, color="tab:red", linewidth=0.5, alpha=0.3)
++    ax.plot(time_s, _smooth_signal(theta), color="tab:green", linewidth=2.5, label=r"$\theta$ (rad)")
++    ax.plot(time_s, _smooth_signal(theta_dot), color="tab:red", linewidth=2.5, label=r"$\dot{\theta}$ (rad/s)")
++    ax.set_xlabel("Time (s)")
++    ax.set_ylabel("Pole State")
++    ax.set_title("Pole State")
++    ax.legend()
++    ax.grid(True, alpha=0.3)
++    fig.tight_layout()
++    fig.savefig(save_path, dpi=150, format="pdf")
++    plt.close(fig)
++
++
++def _plot_control(time_s, forces, actions, save_path):
++    """Plot PID force and discrete action."""
++    fig, ax = plt.subplots(figsize=(6, 6))
++    ax.plot(time_s[:-1], forces, color="tab:purple", linewidth=0.5, alpha=0.3)
++    ax.plot(time_s[:-1], _smooth_signal(forces), color="tab:purple", linewidth=2.5, label="PID Force")
++    ax.step(time_s[:-1], actions, where="post", color="tab:brown", linewidth=1.0, alpha=0.7, label="Action")
++    ax.set_xlabel("Time (s)")
++    ax.set_ylabel("Control")
++    ax.set_title("Control Signal")
++    ax.legend()
++    ax.grid(True, alpha=0.3)
++    fig.tight_layout()
++    fig.savefig(save_path, dpi=150, format="pdf")
++    plt.close(fig)
++
++
++def _plot_basic_states(time_s, state_history, force_history, action_history, save_dir, prefix):
++    """Generate basic state/control plots as PDF."""
+     states = np.asarray(state_history, dtype=float)
+     forces = np.asarray(force_history, dtype=float)
+     actions = np.asarray(action_history, dtype=float)
+-    if states.ndim != 2 or states.shape[1] < 4:
+-        raise ValueError(
+-            f"Expected state history with shape [N,4+], got {states.shape}."
+-        )
+ 
+-    x = states[:, 0]
+-    x_dot = states[:, 1]
++    _plot_cart_state(time_s, states, os.path.join(save_dir, f"{prefix}_cart_state.pdf"))
++    _plot_pole_state(time_s, states, os.path.join(save_dir, f"{prefix}_pole_state.pdf"))
++    _plot_control(time_s, forces, actions, os.path.join(save_dir, f"{prefix}_control.pdf"))
++
++
++def _plot_phase_portrait(states, save_path):
++    """Plot theta vs theta_dot phase portrait."""
+     theta = states[:, 2]
+     theta_dot = states[:, 3]
+ 
+-    fig, axes = plt.subplots(3, 1, figsize=(10, 9), sharex=True)
+-
+-    axes[0].plot(time_s, x, label="cart position x (m)", color="tab:blue")
+-    axes[0].plot(time_s, x_dot, label="cart velocity x_dot (m/s)", color="tab:orange")
+-    axes[0].set_ylabel("Cart State")
+-    axes[0].grid(True, alpha=0.3)
+-    axes[0].legend(loc="best")
+-
+-    axes[1].plot(time_s, theta, label="pole theta (rad)", color="tab:green")
+-    axes[1].plot(time_s, theta_dot, label="pole omega (rad/s)", color="tab:red")
+-    axes[1].set_ylabel("Pole State")
+-    axes[1].grid(True, alpha=0.3)
+-    axes[1].legend(loc="best")
+-
+-    axes[2].plot(time_s[:-1], forces, label="PID force command", color="tab:purple")
+-    axes[2].step(
+-        time_s[:-1],
+-        actions,
+-        where="post",
+-        label="applied action",
+-        color="tab:brown",
+-        alpha=0.7,
+-    )
+-    axes[2].set_xlabel("Time (s)")
+-    axes[2].set_ylabel("Control")
+-    axes[2].grid(True, alpha=0.3)
+-    axes[2].legend(loc="best")
++    fig, ax = plt.subplots(figsize=(6, 6))
++    ax.plot(theta, theta_dot, color="tab:blue", linewidth=0.8, alpha=0.7)
++    ax.scatter(theta[0], theta_dot[0], color="green", s=80, zorder=5, label="Start")
++    ax.scatter(theta[-1], theta_dot[-1], color="red", s=80, zorder=5, label="End")
++    ax.set_xlabel(r"$\theta$ (rad)")
++    ax.set_ylabel(r"$\dot{\theta}$ (rad/s)")
++    ax.set_title("Phase Portrait")
++    ax.legend()
++    ax.grid(True, alpha=0.3)
++    fig.tight_layout()
++    fig.savefig(save_path, dpi=150, format="pdf")
++    plt.close(fig)
++
+ 
+-    fig.suptitle(title)
++def _plot_energy(time_s, states, save_path):
++    """Plot system energy over time."""
++    energy = _compute_energy(states)
++
++    fig, ax = plt.subplots(figsize=(6, 6))
++    ax.plot(time_s, energy, color="tab:orange", linewidth=0.5, alpha=0.3)
++    ax.plot(time_s, _smooth_signal(energy), color="tab:orange", linewidth=2.5)
++    ax.set_xlabel("Time (s)")
++    ax.set_ylabel("Energy (J)")
++    ax.set_title("System Energy")
++    ax.grid(True, alpha=0.3)
++    fig.tight_layout()
++    fig.savefig(save_path, dpi=150, format="pdf")
++    plt.close(fig)
++
++
++def _plot_error_magnitude(time_s, states, save_path):
++    """Plot |theta| and |x| over time."""
++    x = states[:, 0]
++    theta = states[:, 2]
++    abs_theta = np.abs(theta)
++    abs_x = np.abs(x)
++
++    fig, ax = plt.subplots(figsize=(6, 6))
++    ax.plot(time_s, abs_theta, color="tab:green", linewidth=0.5, alpha=0.3)
++    ax.plot(time_s, abs_x, color="tab:blue", linewidth=0.5, alpha=0.3)
++    ax.plot(time_s, _smooth_signal(abs_theta), color="tab:green", linewidth=2.5, label=r"$|\theta|$")
++    ax.plot(time_s, _smooth_signal(abs_x), color="tab:blue", linewidth=2.5, label=r"$|x|$")
++    ax.set_xlabel("Time (s)")
++    ax.set_ylabel("Error Magnitude")
++    ax.set_title("Error Magnitude")
++    ax.legend()
++    ax.grid(True, alpha=0.3)
++    fig.tight_layout()
++    fig.savefig(save_path, dpi=150, format="pdf")
++    plt.close(fig)
++
++
++def _plot_switch_rate(time_s, actions, save_path, window=10):
++    """Plot action switch rate."""
++    rate = _compute_switch_rate(actions, window)
++
++    fig, ax = plt.subplots(figsize=(6, 6))
++    ax.plot(time_s[: len(rate)], rate, color="tab:red", linewidth=0.5, alpha=0.3)
++    ax.plot(time_s[: len(rate)], _smooth_signal(rate), color="tab:red", linewidth=2.5)
++    ax.set_xlabel("Time (s)")
++    ax.set_ylabel("Switch Rate")
++    ax.set_title(f"Action Switch Rate (window={window})")
++    ax.grid(True, alpha=0.3)
++    ax.set_ylim(-0.05, 1.05)
++    fig.tight_layout()
++    fig.savefig(save_path, dpi=150, format="pdf")
++    plt.close(fig)
++
++
++def _plot_integral_terms(time_s, integral_history, save_path):
++    """Plot integral terms over time."""
++    integrals = np.asarray(integral_history, dtype=float)
++
++    fig, ax = plt.subplots(figsize=(6, 6))
++    if integrals.ndim == 2:
++        ax.plot(time_s[: len(integrals)], integrals[:, 0], color="tab:purple", linewidth=0.5, alpha=0.3)
++        ax.plot(time_s[: len(integrals)], integrals[:, 1], color="tab:brown", linewidth=0.5, alpha=0.3)
++        ax.plot(time_s[: len(integrals)], _smooth_signal(integrals[:, 0]), color="tab:purple", linewidth=2.5, label=r"$\int \theta$")
++        ax.plot(time_s[: len(integrals)], _smooth_signal(integrals[:, 1]), color="tab:brown", linewidth=2.5, label=r"$\int x$")
++    ax.set_xlabel("Time (s)")
++    ax.set_ylabel("Integral Value")
++    ax.set_title("Integral Terms")
++    ax.legend()
++    ax.grid(True, alpha=0.3)
++    fig.tight_layout()
++    fig.savefig(save_path, dpi=150, format="pdf")
++    plt.close(fig)
++
++
++def _plot_cumulative_reward(rewards, save_path):
++    """Plot cumulative reward over time."""
++    cumulative = np.cumsum(rewards)
++    steps = np.arange(len(cumulative))
++
++    fig, ax = plt.subplots(figsize=(6, 6))
++    ax.plot(steps, cumulative, color="tab:cyan", linewidth=0.5, alpha=0.3)
++    ax.plot(steps, _smooth_signal(cumulative), color="tab:cyan", linewidth=2.5)
++    ax.set_xlabel("Step")
++    ax.set_ylabel("Cumulative Reward")
++    ax.set_title("Cumulative Reward")
++    ax.grid(True, alpha=0.3)
+     fig.tight_layout()
+-    fig.savefig(save_path, dpi=150)
++    fig.savefig(save_path, dpi=150, format="pdf")
+     plt.close(fig)
+ 
+ 
++def _plot_all_metrics(
++    time_s, state_history, force_history, action_history,
++    integral_history, reward_history, save_dir, prefix
++):
++    """Generate all 6 metric plots as PDF."""
++    states = np.asarray(state_history, dtype=float)
++    actions = np.asarray(action_history, dtype=float)
++    rewards = np.asarray(reward_history, dtype=float)
++
++    os.makedirs(save_dir, exist_ok=True)
++
++    _plot_phase_portrait(states, os.path.join(save_dir, f"{prefix}_phase_portrait.pdf"))
++    _plot_energy(time_s, states, os.path.join(save_dir, f"{prefix}_energy.pdf"))
++    _plot_error_magnitude(time_s, states, os.path.join(save_dir, f"{prefix}_error_magnitude.pdf"))
++    _plot_switch_rate(time_s, actions, os.path.join(save_dir, f"{prefix}_switch_rate.pdf"))
++    _plot_integral_terms(time_s, integral_history, os.path.join(save_dir, f"{prefix}_integral_terms.pdf"))
++    _plot_cumulative_reward(rewards, os.path.join(save_dir, f"{prefix}_cumulative_reward.pdf"))
++
++
+ def _make_env():
+     return make_cartpole_env_from_config(
+         config_path="CartPole-v0_config.yaml", env_id="CartPoleUprightStabilize-v0"
+     )
+ 
+ 
+-def _make_controller(params: PIDParams) -> PIDController:
++def _make_controller(params: PIDParams) -> CartPolePIDController:
+     """
+-    TODO: Implement the controller for the cartpole.
+-    You can edit the PIDParams class to add more parameters to the controller.
+-
+-    Step-by-step implementation suggestion:
+-    1. Replace `PIDController(**kwargs)` with your concrete class, e.g.
+-       `CartPolePIDController(**kwargs)` from `robotics_control.pid`.
+-    2. In controller `compute(obs, dt)`:
+-       - parse `[x, x_dot, theta, theta_dot]`
+-       - compute angle PID term + cart PID term
+-       - clip force and map to discrete action {0,1}
+-    3. Keep `reset()` clearing integrals and previous-action memory.
+-    4. Keep the mapping consistent with env action semantics:
+-       - action 0 => push left, action 1 => push right
++    Create a CartPolePIDController from the given PIDParams.
+     """
+     kwargs = asdict(params)
+-    return PIDController(**kwargs)
++    return CartPolePIDController(**kwargs)
+ 
+ 
+ def run_episode(params, seed, record=False, max_steps=DEFAULT_MAX_STEPS):
+@@ -160,12 +333,14 @@ def run_episode(params, seed, record=False, max_steps=DEFAULT_MAX_STEPS):
+     state_history = [np.asarray(obs, dtype=float).copy()]
+     force_history = []
+     action_history = []
++    integral_history = []
++    reward_history = []
+     video_frames = []
+     total_reward = 0.0
+     stable_count = 0
+ 
+     if record:
+-        first_frame = env.render(mode=render_mode)
++        first_frame = env.render()
+         if first_frame is not None:
+             video_frames.append(first_frame)
+ 
+@@ -175,10 +350,13 @@ def run_episode(params, seed, record=False, max_steps=DEFAULT_MAX_STEPS):
+         total_reward += float(reward)
+         state_history.append(np.asarray(obs, dtype=float).copy())
+         action_history.append(int(action))
++        force_history.append(controller._last_force)
++        integral_history.append([controller._theta_integral, controller._x_integral])
++        reward_history.append(float(reward))
+         stable_count += int(bool(info.get("is_stable_upright", False)))
+ 
+         if record:
+-            frame = env.render(mode=render_mode)
++            frame = env.render()
+             if frame is not None:
+                 video_frames.append(frame)
+ 
+@@ -212,13 +390,13 @@ def run_episode(params, seed, record=False, max_steps=DEFAULT_MAX_STEPS):
+         score=float(score),
+         final_obs=np.asarray(states[-1], dtype=float).tolist(),
+     )
+-    return result, state_history, force_history, action_history, video_frames
++    return result, state_history, force_history, action_history, integral_history, reward_history, video_frames
+ 
+ 
+ def evaluate_params(params, seeds):
+     results = []
+     for seed in seeds:
+-        episode_result, _, _, _, _ = run_episode(params=params, seed=seed, record=False)
++        episode_result, _, _, _, _, _, _ = run_episode(params=params, seed=seed, record=False)
+         results.append(episode_result)
+ 
+     mean_score = float(np.mean([r.score for r in results]))
+@@ -240,26 +418,46 @@ def evaluate_params(params, seeds):
+     }
+ 
+ 
++def _build_run_dir(params: PIDParams) -> str:
++    """Build a timestamped run directory name encoding key PID gains."""
++    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
++    tag = (
++        f"thkp{params.theta_kp:.0f}"
++        f"_thkd{params.theta_kd:.0f}"
++        f"_xkp{params.x_kp:.0f}"
++        f"_xkd{params.x_kd:.0f}"
++    )
++    return os.path.join("runs", f"{ts}_{tag}")
++
++
+ def save_demo_artifacts(params, metrics, output_prefix, demo_seed):
+-    os.makedirs("videos", exist_ok=True)
+-    result, state_history, force_history, action_history, video_frames = run_episode(
++    run_dir = _build_run_dir(params)
++    os.makedirs(run_dir, exist_ok=True)
++
++    result, state_history, force_history, action_history, integral_history, reward_history, video_frames = run_episode(
+         params=params, seed=demo_seed, record=True
+     )
+     time_s = np.arange(len(state_history), dtype=float) * DEFAULT_DT
+-    video_path = os.path.join("videos", f"{output_prefix}.mp4")
+-    curve_path = os.path.join("videos", f"{output_prefix}_states.png")
+-    summary_path = os.path.join("videos", f"{output_prefix}_summary.json")
++    video_path = os.path.join(run_dir, f"{output_prefix}.mp4")
++    summary_path = os.path.join(run_dir, f"{output_prefix}_summary.json")
+ 
+     if video_frames:
+         imageio.mimsave(video_path, video_frames, fps=int(round(1.0 / DEFAULT_DT)))
+-    _plot_rollout(
++
++    # Generate all metric plots
++    _plot_all_metrics(
+         time_s=time_s,
+         state_history=state_history,
+         force_history=force_history,
+         action_history=action_history,
+-        save_path=curve_path,
+-        title="CartPole PID rollout",
++        integral_history=integral_history,
++        reward_history=reward_history,
++        save_dir=run_dir,
++        prefix=output_prefix,
+     )
++
++    # Generate basic state/control plots
++    _plot_basic_states(time_s, state_history, force_history, action_history, run_dir, output_prefix)
+     with open(summary_path, "w", encoding="utf-8") as fh:
+         json.dump(
+             {
+@@ -271,25 +469,26 @@ def save_demo_artifacts(params, metrics, output_prefix, demo_seed):
+             fh,
+             indent=2,
+         )
+-    return video_path, curve_path, summary_path, result
++    return video_path, run_dir, summary_path, result
++
++def _get_config(config_path: str):
++    with open(config_path, "r", encoding="utf-8") as file:
++        config_data = json.load(file)
++    return config_data
+ 
+ 
+ def _run_mode(args):
+     eval_seeds = [args.seed + i for i in range(args.eval_episodes)]
++    config_path = args.config_path
++    config = _get_config(config_path=config_path)
+ 
+     params = PIDParams(
+-        # TODO: Replace with your tuned gains.
+-        # Tuning order recommendation:
+-        # 1) Set angle PD first (theta_kp/theta_kd).
+-        # 2) Add small x PD (x_kp/x_kd) for centering.
+-        # 3) Add tiny integral terms only if persistent bias remains.
+-        # 4) Increase hysteresis if action switches too frequently.
+-        mock_param=1.0
++        **config
+     )
+ 
+     metrics = evaluate_params(params, eval_seeds)
+ 
+-    video_path, curve_path, summary_path, demo_result = save_demo_artifacts(
++    video_path, run_dir, summary_path, demo_result = save_demo_artifacts(
+         params=params,
+         metrics=metrics,
+         output_prefix="cartpole_pid_discrete",
+@@ -305,7 +504,7 @@ def _run_mode(args):
+     print("Demo episode:")
+     print(json.dumps(asdict(demo_result), indent=2))
+     print(f"Video saved to {video_path}")
+-    print(f"State curves saved to {curve_path}")
++    print(f"Plots saved to {run_dir}")
+     print(f"Summary saved to {summary_path}")
+ 
+ 
+@@ -331,6 +530,12 @@ def parse_args():
+         default=123,
+         help="Seed used for the saved demonstration rollout.",
+     )
++    parser.add_argument(
++        "--config_path",
++        type=str,
++        default="params_config/carpole/base.json",
++        help="Seed used for the saved demonstration rollout.",
++    )
+     return parser.parse_args()
+ 
+ 
+diff --git a/demos/cartpole_pid_discrete_demo.mp4 b/demos/cartpole_pid_discrete_demo.mp4
+deleted file mode 100644
+index 3d16942..0000000
+Binary files a/demos/cartpole_pid_discrete_demo.mp4 and /dev/null differ
+diff --git a/demos/cartpole_pid_discrete_states.png b/demos/cartpole_pid_discrete_states.png
+deleted file mode 100644
+index 0cde1c7..0000000
+Binary files a/demos/cartpole_pid_discrete_states.png and /dev/null differ
+diff --git a/demos/dualarm_demo.mp4 b/demos/dualarm_demo.mp4
+deleted file mode 100644
+index 1fe12cc..0000000
+Binary files a/demos/dualarm_demo.mp4 and /dev/null differ
+diff --git a/dualarm_entry.py b/dualarm_entry.py
+index bfa0bce..d06ea32 100644
+--- a/dualarm_entry.py
++++ b/dualarm_entry.py
+@@ -2,14 +2,26 @@ import argparse
+ import json
+ import os
+ from dataclasses import asdict, dataclass
++from datetime import datetime
+ 
+-import gym
++import gymnasium as gym
+ import imageio.v2 as imageio
+ import matplotlib.pyplot as plt
+ import numpy as np
++from tqdm import tqdm
+ 
+ import robotics_control  # noqa: F401
+ from robotics_control.ilqr import calc_ilqr_input, clip_action
++from robotics_control.arm_renderer import create_arm_video
++from plot_results import (
++    plot_joint_position,
++    plot_joint_velocity,
++    plot_control_torque,
++    plot_error_norm,
++    plot_control_effort,
++    plot_energy,
++    plot_reward,
++)
+ 
+ DEFAULT_ENV_NAME = "TwoLinkArm-limited-torque-random-goal-v0"
+ DEFAULT_SIM_TIME = 10.0
+@@ -39,14 +51,14 @@ def _sync_goal(sim_env, env):
+     sim_env.unwrapped.goal_dq = env.unwrapped.goal_dq.copy()
+ 
+ 
+-def _reset_env_pair(env_name, seed):
+-    env = gym.make(env_name, noise_free=True)
++def _reset_env_pair(env_name, seed, render_mode=None):
++    kwargs = {"noise_free": True}
++    if render_mode:
++        kwargs["render_mode"] = render_mode
++    env = gym.make(env_name, **kwargs)
+     sim_env = gym.make(env_name, noise_free=True)
+-    if seed is not None:
+-        env.seed(seed)
+-        sim_env.seed(seed + 10_000)
+-    env.reset()
+-    sim_env.reset()
++    env.reset(seed=seed)
++    sim_env.reset(seed=seed + 10_000 if seed is not None else None)
+     _sync_goal(sim_env, env)
+     return env, sim_env
+ 
+@@ -56,52 +68,103 @@ def _run_episode(
+     env_name,
+     seed,
+     sim_time=DEFAULT_SIM_TIME,
++    r_scale=0.01,
+     record=False,
+     video_path=None,
+     plot_path=None,
+ ):
+-    env, sim_env = _reset_env_pair(env_name, seed)
+-    sim_fps = int(round(1.0 / env.dt))
++    render_mode = "rgb_array" if record else None
++    env, sim_env = _reset_env_pair(env_name, seed, render_mode=render_mode)
++    sim_fps = int(round(1.0 / env.unwrapped.dt))
+     record_stride = max(1, int(round(sim_fps / DEFAULT_RECORD_FPS)))
+ 
+     video_frames = []
+     if record:
+-        frame = env.render(mode="rgb_array")
++        frame = env.render()
+         if frame is not None:
+             video_frames.append(frame)
+ 
+     u_cmd_filt = None
+     total_reward = 0.0
+     settled_steps = 0
+-    state_history = [np.asarray(env.state, dtype=float).copy()]
+-    goal_history = [np.asarray(env.goal, dtype=float).copy()]
++    state_history = [np.asarray(env.unwrapped.state, dtype=float).copy()]
++    goal_history = [np.asarray(env.unwrapped.goal, dtype=float).copy()]
+     control_history = []
++    reward_history = []
+     plan_cost_history = []
+ 
+-    for i in range(int(sim_time * sim_fps)):
+-        # TODO: generate actions here using ilqr
+-        control_action = np.zeros(2)
+-
+-        obs, reward, done, _ = env.step(control_action.copy())
++    # iLQR parameters
++    tN = 100
++    ilqr_max_iter = 100000
++    ilqr_tol = 1e-6
++    ilqr_reg = 1e-2
++
++    # Buffer for planned control sequence
++    U_plan = None
++    plan_idx = 0
++    replan_interval = 50  # Replan every N steps
++    total_steps = int(sim_time * sim_fps)
++
++    pbar = tqdm(total=total_steps, desc=f"", unit="step")
++    for i in range(total_steps):
++        # Replan using iLQR periodically or when plan is exhausted
++        if U_plan is None or plan_idx >= len(U_plan) or i % replan_interval == 0:
++            _sync_goal(sim_env, env)
++            # Warm-start: shift previous plan forward
++            u_warm = None
++            if U_plan is not None and plan_idx < len(U_plan):
++                u_warm = np.zeros((tN, env.action_space.shape[0]))
++                remaining = U_plan[plan_idx:]
++                u_warm[:len(remaining)] = remaining
++            U_plan = calc_ilqr_input(
++                env=env,
++                sim_env=sim_env,
++                tN=tN,
++                max_iter=ilqr_max_iter,
++                tol=ilqr_tol,
++                reg=ilqr_reg,
++                r_scale=r_scale,
++                velocity_q_scale=1.0,
++                u_init=u_warm,
++            )
++            plan_idx = 0
++
++        control_action = U_plan[plan_idx].copy()
++        plan_idx += 1
++
++        obs, reward, terminated, truncated, _ = env.step(control_action.copy())
++        done = terminated or truncated
+         total_reward += float(reward)
+ 
+         state = np.asarray(obs, dtype=float).copy()
+-        goal = np.asarray(env.goal, dtype=float).copy()
++        goal = np.asarray(env.unwrapped.goal, dtype=float).copy()
+         err = state - goal
+         err_norm = float(np.linalg.norm(err))
+         settled_steps += int(err_norm < 0.05)
+         state_history.append(state)
+         goal_history.append(goal)
+         control_history.append(np.asarray(control_action, dtype=float).copy())
++        reward_history.append(float(reward))
+ 
+         if record and i % record_stride == 0:
+-            frame = env.render(mode="rgb_array")
++            frame = env.render()
+             if frame is not None:
+                 video_frames.append(frame)
+ 
++        pbar.update(1)
++        pbar.set_postfix(err=f"{err_norm:.4f}")
++
+         if done:
++            pbar.write(f"[Step {i+1}/{total_steps}] Goal reached!")
+             break
+ 
++    pbar.close()
++
++    print(f"\n=== Episode Summary ===")
++    print(f"Steps: {len(control_history)}")
++    print(f"Total reward: {total_reward:.2f}")
++    print(f"Final error: {err_norm:.4f}")
++
+     states = np.asarray(state_history, dtype=float)
+     goals = np.asarray(goal_history, dtype=float)
+     controls = (
+@@ -139,7 +202,7 @@ def _run_episode(
+     )
+ 
+     if record and plot_path is not None:
+-        time_s = np.arange(states.shape[0], dtype=float) * env.dt
++        time_s = np.arange(states.shape[0], dtype=float) * env.unwrapped.dt
+         fig, axes = plt.subplots(3, 1, figsize=(10, 9), sharex=True)
+         axes[0].plot(time_s, states[:, 0], label="q0", color="tab:blue")
+         axes[0].plot(time_s, states[:, 1], label="q1", color="tab:orange")
+@@ -175,17 +238,18 @@ def _run_episode(
+     if record and video_path is not None and video_frames:
+         imageio.mimsave(video_path, video_frames, fps=DEFAULT_RECORD_FPS)
+ 
+-    return metrics, states, goals, controls, plan_cost_history
++    return metrics, states, goals, controls, plan_cost_history, reward_history
+ 
+ 
+-def evaluate_params(params, env_name, seeds, sim_time=DEFAULT_SIM_TIME):
++def evaluate_params(params, env_name, seeds, sim_time=DEFAULT_SIM_TIME, r_scale=0.01):
+     episodes = []
+     for seed in seeds:
+-        metrics, _, _, _, _ = _run_episode(
++        metrics, _, _, _, _, _ = _run_episode(
+             params=params,
+             env_name=env_name,
+             seed=seed,
+             sim_time=sim_time,
++            r_scale=r_scale,
+             record=False,
+         )
+         episodes.append(metrics)
+@@ -206,22 +270,54 @@ def evaluate_params(params, env_name, seeds, sim_time=DEFAULT_SIM_TIME):
+     }
+ 
+ 
+-def save_demo(params, metrics, env_name, demo_seed, sim_time, prefix):
+-    os.makedirs("videos", exist_ok=True)
+-    video_path = os.path.join("videos", f"{prefix}.mp4")
+-    plot_path = os.path.join("videos", f"{prefix}_states.png")
+-    summary_path = os.path.join("videos", f"{prefix}_summary.json")
++def save_demo(params, metrics, env_name, demo_seed, sim_time, prefix, result_dir, r_scale=0.01):
++    os.makedirs(result_dir, exist_ok=True)
++    video_path = os.path.join(result_dir, f"{prefix}.mp4")
++    plot_path = os.path.join(result_dir, f"{prefix}_states.png")
++    summary_path = os.path.join(result_dir, f"{prefix}_summary.json")
+ 
+-    demo_metrics, states, goals, controls, plan_cost_history = _run_episode(
++    demo_metrics, states, goals, controls, plan_cost_history, reward_history = _run_episode(
+         params=params,
+         env_name=env_name,
+         seed=demo_seed,
+         sim_time=sim_time,
++        r_scale=r_scale,
+         record=True,
+         video_path=video_path,
+         plot_path=plot_path,
+     )
+ 
++    # Save trajectory data for post-processing plots
++    np.savez(
++        os.path.join(result_dir, f"{prefix}_trajectory.npz"),
++        states=states,
++        goals=goals,
++        controls=controls,
++        rewards=np.asarray(reward_history, dtype=float),
++    )
++
++    # Generate PDF plots
++    dt = 0.001  # TwoLinkArm default
++    n_steps = states.shape[0]
++    time_s = np.arange(n_steps, dtype=float) * dt
++    control_time = time_s[:-1] if controls.shape[0] == n_steps - 1 else time_s
++
++    plot_joint_position(time_s, states, goals,
++                        os.path.join(result_dir, "plot_joint_position.pdf"))
++    plot_joint_velocity(time_s, states,
++                        os.path.join(result_dir, "plot_joint_velocity.pdf"))
++    plot_control_torque(control_time, controls,
++                        os.path.join(result_dir, "plot_control_torque.pdf"))
++    plot_error_norm(time_s, states, goals,
++                    os.path.join(result_dir, "plot_error_norm.pdf"))
++    plot_control_effort(control_time, controls, result_dir, prefix="plot")
++    plot_energy(time_s, states,
++                os.path.join(result_dir, "plot_energy.pdf"))
++    if reward_history:
++        reward_time = control_time[:len(reward_history)]
++        plot_reward(reward_time, np.asarray(reward_history),
++                    os.path.join(result_dir, "plot_reward.pdf"))
++
+     with open(summary_path, "w", encoding="utf-8") as fh:
+         json.dump(
+             {
+@@ -273,19 +369,58 @@ def parse_args():
+         default=DEFAULT_SIM_TIME,
+         help="Simulation time in seconds.",
+     )
++    parser.add_argument(
++        "--result-dir",
++        type=str,
++        default=None,
++        help="Directory to save all results. Auto-generated as results/<env_name>_<timestamp> if not set.",
++    )
++    parser.add_argument(
++        "--r-scale",
++        type=float,
++        default=0.01,
++        help="Control cost multiplier. Smaller = more aggressive torques = faster reaching.",
++    )
+     return parser.parse_args()
+ 
+ 
+ def main():
+     args = parse_args()
++
++    # Resolve result directory
++    if args.result_dir:
++        result_dir = args.result_dir
++    else:
++        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
++        result_dir = os.path.join("results", f"{timestamp}_{args.env_name}")
++    os.makedirs(result_dir, exist_ok=True)
++
+     eval_seeds = [args.seed + i for i in range(args.eval_episodes)]
+ 
+     best_params = ILQRParams(mock_param=0.0)
+     best_metrics = evaluate_params(
+-        best_params, args.env_name, eval_seeds, sim_time=args.sim_time
++        best_params, args.env_name, eval_seeds, sim_time=args.sim_time, r_scale=args.r_scale
+     )
+     history = []
+ 
++    # Save hyperparameters
++    hyperparams = {
++        "env_name": args.env_name,
++        "sim_time": args.sim_time,
++        "eval_episodes": args.eval_episodes,
++        "seed": args.seed,
++        "demo_seed": args.demo_seed,
++        "r_scale": args.r_scale,
++        "tN": 100,
++        "ilqr_max_iter": 100000,
++        "ilqr_tol": 1e-6,
++        "ilqr_reg": 1e-2,
++        "replan_interval": 50,
++        "Q_terminal_diag": 1e4,
++    }
++    with open(os.path.join(result_dir, "hyperparameters.json"), "w", encoding="utf-8") as fh:
++        json.dump(hyperparams, fh, indent=2)
++
+     video_path, plot_path, summary_path, demo_metrics = save_demo(
+         params=best_params,
+         metrics=best_metrics,
+@@ -293,6 +428,8 @@ def main():
+         demo_seed=args.demo_seed,
+         sim_time=args.sim_time,
+         prefix="two_link_arm_ilqr",
++        result_dir=result_dir,
++        r_scale=args.r_scale,
+     )
+ 
+     print("")
+@@ -305,10 +442,12 @@ def main():
+         print(f"Search generations completed: {len(history)}")
+     print("Demo metrics:")
+     print(json.dumps(asdict(demo_metrics), indent=2))
+-    print(f"Video saved to {video_path}")
+-    print(f"State plot saved to {plot_path}")
+-    print(f"Summary saved to {summary_path}")
++    print(f"Results saved to {result_dir}")
++    print(f"  Video: {video_path}")
++    print(f"  State plot: {plot_path}")
++    print(f"  Summary: {summary_path}")
++    print(f"  Hyperparameters: {os.path.join(result_dir, 'hyperparameters.json')}")
+ 
+ 
+ if __name__ == "__main__":
+-    main()
++    main()
+\ No newline at end of file
+diff --git a/param_sensitivity_analysis.py b/param_sensitivity_analysis.py
+new file mode 100644
+index 0000000..f3df5b4
+--- /dev/null
++++ b/param_sensitivity_analysis.py
+@@ -0,0 +1,267 @@
++"""
++PID Parameter Sensitivity Analysis Script.
++
++Varies each PID parameter independently while keeping others fixed,
++and evaluates performance metrics across multiple seeds.
++"""
++
++import json
++import os
++from dataclasses import asdict, dataclass
++
++import matplotlib.pyplot as plt
++import numpy as np
++
++from cartpole_entry import PIDParams, evaluate_params, run_episode
++
++
++@dataclass
++class SensitivityConfig:
++    """Configuration for sensitivity analysis of a single parameter."""
++
++    param_name: str
++    values: list[float]
++    base_params: PIDParams
++
++
++# Base parameters (current best)
++BASE_PARAMS = PIDParams(
++    theta_kp=46,
++    theta_kd=11,
++    theta_ki=0.0,
++    x_kp=3.2,
++    x_kd=5,
++    x_ki=0.3,
++    force_limit=10.0,
++    integral_limit=5.0,
++    hysteresis=1.5,
++)
++
++# Parameter ranges to sweep (50+ data points for smooth curves)
++SENSITIVITY_CONFIGS = [
++    SensitivityConfig("theta_kp", np.linspace(10, 90, 50).tolist(), BASE_PARAMS),
++    SensitivityConfig("theta_kd", np.linspace(2, 30, 50).tolist(), BASE_PARAMS),
++    SensitivityConfig("theta_ki", np.linspace(0.0, 8.0, 50).tolist(), BASE_PARAMS),
++    SensitivityConfig("x_kp", np.linspace(0.5, 8.0, 50).tolist(), BASE_PARAMS),
++    SensitivityConfig("x_kd", np.linspace(1, 12, 50).tolist(), BASE_PARAMS),
++    SensitivityConfig("x_ki", np.linspace(0.0, 2.0, 50).tolist(), BASE_PARAMS),
++    SensitivityConfig("hysteresis", np.linspace(0.2, 5.0, 50).tolist(), BASE_PARAMS),
++]
++
++# Representative values for detailed trajectory comparison (3 values per param)
++REPRESENTATIVE_VALUES = {
++    "theta_kp": [20, 46, 70],      # low, base, high
++    "theta_kd": [5, 11, 20],       # low, base, high
++    "theta_ki": [0.0, 1.0, 5.0],   # none, moderate, high
++    "x_kp": [1.0, 3.2, 6.0],      # low, base, high
++    "x_kd": [2, 5, 10],           # low, base, high
++    "x_ki": [0.0, 0.3, 1.0],      # none, base, high
++    "hysteresis": [0.5, 1.5, 3.0], # low, base, high
++}
++
++
++def run_sensitivity_analysis(
++    configs: list[SensitivityConfig],
++    seeds: list[int] = None,
++    output_dir: str = "sensitivity_results",
++):
++    """
++    Run sensitivity analysis for each parameter configuration.
++
++    Args:
++        configs: List of SensitivityConfig objects.
++        seeds: Random seeds for evaluation.
++        output_dir: Directory to save results.
++    """
++    if seeds is None:
++        seeds = [7 + i for i in range(5)]
++
++    os.makedirs(output_dir, exist_ok=True)
++    all_results = {}
++
++    for config in configs:
++        print(f"\n{'='*60}")
++        print(f"Analyzing parameter: {config.param_name}")
++        print(f"Values: {config.values}")
++        print(f"{'='*60}")
++
++        param_results = []
++
++        for value in config.values:
++            # Create params with current value
++            params_dict = asdict(config.base_params)
++            params_dict[config.param_name] = value
++            params = PIDParams(**params_dict)
++
++            # Evaluate
++            metrics = evaluate_params(params, seeds)
++
++            result = {
++                "value": value,
++                "metrics": metrics,
++            }
++            param_results.append(result)
++
++            print(f"  {config.param_name}={value:.2f}: "
++                  f"reward={metrics['reward']:.1f}, "
++                  f"steps={metrics['steps']:.0f}, "
++                  f"stable_ratio={metrics['stable_ratio']:.3f}, "
++                  f"switch_rate={metrics['switch_rate']:.3f}")
++
++        all_results[config.param_name] = param_results
++
++    # Save results
++    results_path = os.path.join(output_dir, "sensitivity_results.json")
++    with open(results_path, "w") as f:
++        json.dump(all_results, f, indent=2)
++    print(f"\nResults saved to {results_path}")
++
++    return all_results
++
++
++def plot_sensitivity_results(all_results: dict, output_dir: str = "sensitivity_results"):
++    """Generate sensitivity analysis plots."""
++    os.makedirs(output_dir, exist_ok=True)
++
++    metrics_to_plot = [
++        ("reward", "Total Reward"),
++        ("stable_ratio", "Stable Ratio"),
++        ("switch_rate", "Switch Rate"),
++        ("mean_abs_theta", r"Mean $|\theta|$ (rad)"),
++    ]
++
++    for param_name, results in all_results.items():
++        values = [r["value"] for r in results]
++
++        fig, axes = plt.subplots(2, 2, figsize=(10, 10))
++        fig.suptitle(f"Sensitivity Analysis: {param_name}", fontsize=14)
++
++        for idx, (metric_key, metric_label) in enumerate(metrics_to_plot):
++            ax = axes[idx // 2][idx % 2]
++            metric_values = [r["metrics"][metric_key] for r in results]
++
++            ax.plot(values, metric_values, "o-", color="tab:blue", linewidth=2, markersize=8)
++            ax.set_xlabel(param_name)
++            ax.set_ylabel(metric_label)
++            ax.grid(True, alpha=0.3)
++
++            # Highlight best value
++            if metric_key in ["reward", "stable_ratio"]:
++                best_idx = np.argmax(metric_values)
++            else:
++                best_idx = np.argmin(metric_values)
++            ax.scatter(values[best_idx], metric_values[best_idx], color="red", s=100, zorder=5)
++
++        fig.tight_layout()
++        plot_path = os.path.join(output_dir, f"sensitivity_{param_name}.pdf")
++        fig.savefig(plot_path, dpi=150, format="pdf")
++        plt.close(fig)
++        print(f"Plot saved to {plot_path}")
++
++
++def plot_trajectory_comparison(
++    param_name: str,
++    representative_values: list[float],
++    base_params: PIDParams,
++    seed: int = 42,
++    output_dir: str = "sensitivity_results",
++):
++    """
++    Generate side-by-side trajectory comparison for representative parameter values.
++
++    Args:
++        param_name: Name of the parameter to vary.
++        representative_values: List of 3 values (low, base, high) to compare.
++        base_params: Base PID parameters.
++        seed: Random seed for reproducibility.
++        output_dir: Directory to save plots.
++    """
++    os.makedirs(output_dir, exist_ok=True)
++
++    fig, axes = plt.subplots(3, 3, figsize=(15, 15))
++    fig.suptitle(f"Trajectory Comparison: {param_name}", fontsize=16)
++
++    labels = ["Low", "Base", "High"]
++
++    for col, (value, label) in enumerate(zip(representative_values, labels)):
++        # Create params with current value
++        params_dict = asdict(base_params)
++        params_dict[param_name] = value
++        params = PIDParams(**params_dict)
++
++        # Run episode
++        result, state_history, force_history, action_history, _, _, _ = run_episode(
++            params=params, seed=seed, record=False
++        )
++        states = np.asarray(state_history)
++        forces = np.asarray(force_history)
++        actions = np.asarray(action_history)
++        time_s = np.arange(len(states)) * 0.02
++
++        # Plot pole angle
++        ax = axes[0][col]
++        ax.plot(time_s, states[:, 2], color="tab:green", linewidth=0.5, alpha=0.3)
++        ax.plot(time_s, _smooth(states[:, 2]), color="tab:green", linewidth=2.0)
++        ax.set_title(f"{label}: {param_name}={value}\nθ (rad)")
++        ax.grid(True, alpha=0.3)
++        if col == 0:
++            ax.set_ylabel("Pole Angle")
++
++        # Plot cart position
++        ax = axes[1][col]
++        ax.plot(time_s, states[:, 0], color="tab:blue", linewidth=0.5, alpha=0.3)
++        ax.plot(time_s, _smooth(states[:, 0]), color="tab:blue", linewidth=2.0)
++        ax.set_title(f"x (m)")
++        ax.grid(True, alpha=0.3)
++        if col == 0:
++            ax.set_ylabel("Cart Position")
++
++        # Plot control force
++        ax = axes[2][col]
++        ax.plot(time_s[:-1], forces, color="tab:purple", linewidth=0.5, alpha=0.3)
++        ax.plot(time_s[:-1], _smooth(forces), color="tab:purple", linewidth=2.0)
++        ax.set_title(f"Force (N)\nReward={result.total_reward:.0f}")
++        ax.set_xlabel("Time (s)")
++        ax.grid(True, alpha=0.3)
++        if col == 0:
++            ax.set_ylabel("Control Force")
++
++    fig.tight_layout()
++    plot_path = os.path.join(output_dir, f"trajectory_comparison_{param_name}.pdf")
++    fig.savefig(plot_path, dpi=150, format="pdf")
++    plt.close(fig)
++    print(f"Trajectory comparison saved to {plot_path}")
++
++
++def _smooth(signal, window=15):
++    """Simple moving average for plotting."""
++    if len(signal) < window:
++        return signal
++    kernel = np.ones(window) / window
++    smoothed = np.convolve(signal, kernel, mode="same")
++    smoothed[:window//2] = signal[:window//2]
++    smoothed[-(window//2):] = signal[-(window//2):]
++    return smoothed
++
++
++def main():
++    """Run sensitivity analysis and generate plots."""
++    print("Starting PID Parameter Sensitivity Analysis")
++    print(f"Base parameters: {asdict(BASE_PARAMS)}")
++
++    # Run analysis
++    all_results = run_sensitivity_analysis(SENSITIVITY_CONFIGS)
++
++    # Generate sensitivity trend plots
++    plot_sensitivity_results(all_results)
++
++    # Generate trajectory comparison plots for each parameter
++    print("\nGenerating trajectory comparison plots...")
++    for param_name, values in REPRESENTATIVE_VALUES.items():
++        plot_trajectory_comparison(param_name, values, BASE_PARAMS)
++
++    print("\nSensitivity analysis complete!")
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/params_config/carpole/base.json b/params_config/carpole/base.json
+new file mode 100644
+index 0000000..c20091a
+--- /dev/null
++++ b/params_config/carpole/base.json
+@@ -0,0 +1,11 @@
++{
++    "theta_kp": 46,
++    "theta_kd": 11,
++    "theta_ki": 0.0,
++    "x_kp": 3.2,
++    "x_kd": 5,
++    "x_ki": 0.3,
++    "force_limit": 10.0,
++    "integral_limit": 5.0,
++    "hysteresis": 1.5
++}
+\ No newline at end of file
+diff --git a/plot_results.py b/plot_results.py
+new file mode 100644
+index 0000000..2fae990
+--- /dev/null
++++ b/plot_results.py
+@@ -0,0 +1,411 @@
++"""Comprehensive plotting script for iLQR two-link arm results.
++
++Usage:
++    python plot_results.py <result_dir>
++
++Reads trajectory.npz and generates PDF plots in the same directory.
++"""
++
++import argparse
++import os
++import sys
++
++import numpy as np
++import matplotlib.pyplot as plt
++
++
++# ---------------------------------------------------------------------------
++# Style helpers
++# ---------------------------------------------------------------------------
++
++def _smooth_signal(signal, window=15):
++    """Moving average with edge preservation."""
++    if len(signal) < window:
++        return signal
++    kernel = np.ones(window) / window
++    smoothed = np.convolve(signal, kernel, mode="same")
++    smoothed[: window // 2] = signal[: window // 2]
++    smoothed[-(window // 2) :] = signal[-(window // 2) :]
++    return smoothed
++
++
++def _end_effector_pos(q, l1=0.5, l2=0.75):
++    """Compute (x, y) of the end effector from joint angles."""
++    x1 = l1 * np.cos(q[:, 0])
++    y1 = l1 * np.sin(q[:, 0])
++    x2 = x1 + l2 * np.cos(q[:, 0] + q[:, 1])
++    y2 = y1 + l2 * np.sin(q[:, 0] + q[:, 1])
++    return x1, y1, x2, y2
++
++
++def _kinetic_energy(states, l1=0.5, l2=0.75, m1=0.33, m2=0.55):
++    """Approximate kinetic energy from joint velocities."""
++    dq0 = states[:, 2]
++    dq1 = states[:, 3]
++    # Simplified: KE ~ 0.5 * I_eff * dq^2
++    I1 = (1 / 3 * m1 + m2) * l1 ** 2
++    I2 = 1 / 3 * m2 * l2 ** 2
++    ke = 0.5 * I1 * dq0 ** 2 + 0.5 * I2 * (dq0 + dq1) ** 2
++    return ke
++
++
++# ---------------------------------------------------------------------------
++# Individual plot functions
++# ---------------------------------------------------------------------------
++
++def plot_joint_position(time_s, states, goals, save_path):
++    """Joint position tracking with goals."""
++    fig, ax = plt.subplots(figsize=(6, 6))
++    ax.plot(time_s, states[:, 0], color="tab:blue", linewidth=0.5, alpha=0.3)
++    ax.plot(time_s, states[:, 1], color="tab:orange", linewidth=0.5, alpha=0.3)
++    ax.plot(time_s, _smooth_signal(states[:, 0]), color="tab:blue", linewidth=2.5,
++            label=r"$q_0$")
++    ax.plot(time_s, _smooth_signal(states[:, 1]), color="tab:orange", linewidth=2.5,
++            label=r"$q_1$")
++    ax.plot(time_s, goals[:, 0], "--", color="tab:blue", linewidth=1.2, alpha=0.5,
++            label=r"$q_0^*$")
++    ax.plot(time_s, goals[:, 1], "--", color="tab:orange", linewidth=1.2, alpha=0.5,
++            label=r"$q_1^*$")
++    ax.set_xlabel("Time (s)")
++    ax.set_ylabel("Joint Position (rad)")
++    ax.set_title("Joint Position Tracking")
++    ax.legend(loc="best")
++    ax.grid(True, alpha=0.3)
++    fig.tight_layout()
++    fig.savefig(save_path, dpi=150, format="pdf")
++    plt.close(fig)
++
++
++def plot_joint_velocity(time_s, states, save_path):
++    """Joint velocities over time."""
++    fig, ax = plt.subplots(figsize=(6, 6))
++    ax.plot(time_s, states[:, 2], color="tab:green", linewidth=0.5, alpha=0.3)
++    ax.plot(time_s, states[:, 3], color="tab:red", linewidth=0.5, alpha=0.3)
++    ax.plot(time_s, _smooth_signal(states[:, 2]), color="tab:green", linewidth=2.5,
++            label=r"$\dot{q}_0$")
++    ax.plot(time_s, _smooth_signal(states[:, 3]), color="tab:red", linewidth=2.5,
++            label=r"$\dot{q}_1$")
++    ax.axhline(0, color="gray", linewidth=0.8, linestyle="--")
++    ax.set_xlabel("Time (s)")
++    ax.set_ylabel("Joint Velocity (rad/s)")
++    ax.set_title("Joint Velocity")
++    ax.legend(loc="best")
++    ax.grid(True, alpha=0.3)
++    fig.tight_layout()
++    fig.savefig(save_path, dpi=150, format="pdf")
++    plt.close(fig)
++
++
++def plot_control_torque(time_s, controls, save_path):
++    """Control torques over time."""
++    fig, ax = plt.subplots(figsize=(6, 6))
++    ax.plot(time_s, controls[:, 0], color="tab:purple", linewidth=0.5, alpha=0.3)
++    ax.plot(time_s, controls[:, 1], color="tab:brown", linewidth=0.5, alpha=0.3)
++    ax.plot(time_s, _smooth_signal(controls[:, 0]), color="tab:purple", linewidth=2.5,
++            label=r"$\tau_0$")
++    ax.plot(time_s, _smooth_signal(controls[:, 1]), color="tab:brown", linewidth=2.5,
++            label=r"$\tau_1$")
++    ax.axhline(0, color="gray", linewidth=0.8, linestyle="--")
++    ax.set_xlabel("Time (s)")
++    ax.set_ylabel("Torque (N m)")
++    ax.set_title("Control Torque")
++    ax.legend(loc="best")
++    ax.grid(True, alpha=0.3)
++    fig.tight_layout()
++    fig.savefig(save_path, dpi=150, format="pdf")
++    plt.close(fig)
++
++
++def plot_error_norm(time_s, states, goals, save_path):
++    """Position and velocity error norms over time."""
++    pos_err = np.linalg.norm(states[:, :2] - goals[:, :2], axis=1)
++    vel_err = np.linalg.norm(states[:, 2:] - goals[:, 2:], axis=1)
++    total_err = np.linalg.norm(states - goals, axis=1)
++
++    fig, ax = plt.subplots(figsize=(6, 6))
++    ax.plot(time_s, pos_err, color="tab:blue", linewidth=0.5, alpha=0.3)
++    ax.plot(time_s, vel_err, color="tab:red", linewidth=0.5, alpha=0.3)
++    ax.plot(time_s, _smooth_signal(pos_err), color="tab:blue", linewidth=2.5,
++            label=r"$\|q - q^*\|$")
++    ax.plot(time_s, _smooth_signal(vel_err), color="tab:red", linewidth=2.5,
++            label=r"$\|\dot{q} - \dot{q}^*\|$")
++    ax.plot(time_s, _smooth_signal(total_err), color="tab:green", linewidth=2.0,
++            alpha=0.7, label=r"$\|x - x^*\|$")
++    ax.set_xlabel("Time (s)")
++    ax.set_ylabel("Error Norm")
++    ax.set_title("Tracking Error")
++    ax.legend(loc="best")
++    ax.grid(True, alpha=0.3)
++    ax.set_yscale("log")
++    fig.tight_layout()
++    fig.savefig(save_path, dpi=150, format="pdf")
++    plt.close(fig)
++
++
++def plot_control_effort(time_s, controls, save_dir, prefix="plot"):
++    """Control effort ||u|| over time — two separate square PDFs."""
++    u_norm = np.linalg.norm(controls, axis=1)
++    u_cumsum = np.cumsum(u_norm)
++
++    # Instantaneous
++    fig, ax = plt.subplots(figsize=(6, 6))
++    ax.plot(time_s, u_norm, color="tab:purple", linewidth=0.5, alpha=0.3)
++    ax.plot(time_s, _smooth_signal(u_norm), color="tab:purple", linewidth=2.5,
++            label=r"$\|u\|$")
++    ax.set_xlabel("Time (s)")
++    ax.set_ylabel("Torque Norm")
++    ax.set_title("Instantaneous Control Effort")
++    ax.legend(loc="best")
++    ax.grid(True, alpha=0.3)
++    fig.tight_layout()
++    fig.savefig(os.path.join(save_dir, f"{prefix}_effort_instant.pdf"), dpi=150, format="pdf")
++    plt.close(fig)
++
++    # Cumulative
++    fig, ax = plt.subplots(figsize=(6, 6))
++    ax.plot(time_s, u_cumsum, color="tab:orange", linewidth=2.0,
++            label=r"$\sum \|u\|$")
++    ax.set_xlabel("Time (s)")
++    ax.set_ylabel("Cumulative Torque")
++    ax.set_title("Cumulative Control Effort")
++    ax.legend(loc="best")
++    ax.grid(True, alpha=0.3)
++    fig.tight_layout()
++    fig.savefig(os.path.join(save_dir, f"{prefix}_effort_cumulative.pdf"), dpi=150, format="pdf")
++    plt.close(fig)
++
++
++def plot_end_effector(states, goals, save_path, l1=0.5, l2=0.75):
++    """End-effector trajectory in Cartesian space."""
++    _, _, x_ee, y_ee = _end_effector_pos(states, l1, l2)
++    _, _, gx_ee, gy_ee = _end_effector_pos(goals, l1, l2)
++
++    fig, ax = plt.subplots(figsize=(6, 6))
++    ax.plot(x_ee, y_ee, color="tab:blue", linewidth=1.5, alpha=0.7, label="Actual")
++    ax.plot(x_ee[0], y_ee[0], "go", markersize=10, label="Start", zorder=5)
++    ax.plot(x_ee[-1], y_ee[-1], "rs", markersize=10, label="End", zorder=5)
++    ax.plot(gx_ee[-1], gy_ee[-1], "b*", markersize=15, label="Goal", zorder=5)
++    # Draw goal region
++    circle = plt.Circle((gx_ee[-1], gy_ee[-1]), 0.05, color="blue",
++                         alpha=0.1, linestyle="--", fill=False, linewidth=1.5)
++    ax.add_patch(circle)
++    ax.set_xlabel("x (m)")
++    ax.set_ylabel("y (m)")
++    ax.set_title("End-Effector Trajectory")
++    ax.set_aspect("equal")
++    ax.legend(loc="best")
++    ax.grid(True, alpha=0.3)
++    fig.tight_layout()
++    fig.savefig(save_path, dpi=150, format="pdf")
++    plt.close(fig)
++
++
++def plot_phase_portrait(states, save_path):
++    """Phase portrait: q vs dq for each joint."""
++    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
++
++    ax1.plot(states[:, 0], states[:, 2], color="tab:blue", linewidth=1.0, alpha=0.7)
++    ax1.plot(states[0, 0], states[0, 2], "go", markersize=10, label="Start", zorder=5)
++    ax1.plot(states[-1, 0], states[-1, 2], "rs", markersize=10, label="End", zorder=5)
++    ax1.set_xlabel(r"$q_0$ (rad)")
++    ax1.set_ylabel(r"$\dot{q}_0$ (rad/s)")
++    ax1.set_title("Joint 0 Phase Portrait")
++    ax1.legend(loc="best")
++    ax1.grid(True, alpha=0.3)
++
++    ax2.plot(states[:, 1], states[:, 3], color="tab:orange", linewidth=1.0, alpha=0.7)
++    ax2.plot(states[0, 1], states[0, 3], "go", markersize=10, label="Start", zorder=5)
++    ax2.plot(states[-1, 1], states[-1, 3], "rs", markersize=10, label="End", zorder=5)
++    ax2.set_xlabel(r"$q_1$ (rad)")
++    ax2.set_ylabel(r"$\dot{q}_1$ (rad/s)")
++    ax2.set_title("Joint 1 Phase Portrait")
++    ax2.legend(loc="best")
++    ax2.grid(True, alpha=0.3)
++
++    fig.tight_layout()
++    fig.savefig(save_path, dpi=150, format="pdf")
++    plt.close(fig)
++
++
++def plot_energy(time_s, states, save_path):
++    """Kinetic energy over time."""
++    ke = _kinetic_energy(states)
++
++    fig, ax = plt.subplots(figsize=(6, 6))
++    ax.plot(time_s, ke, color="tab:orange", linewidth=0.5, alpha=0.3)
++    ax.plot(time_s, _smooth_signal(ke), color="tab:orange", linewidth=2.5,
++            label="Kinetic Energy")
++    ax.set_xlabel("Time (s)")
++    ax.set_ylabel("Energy (J)")
++    ax.set_title("System Energy")
++    ax.legend(loc="best")
++    ax.grid(True, alpha=0.3)
++    fig.tight_layout()
++    fig.savefig(save_path, dpi=150, format="pdf")
++    plt.close(fig)
++
++
++def plot_reward(time_s, rewards, save_path):
++    """Per-step reward over time."""
++    fig, ax = plt.subplots(figsize=(6, 6))
++    ax.plot(time_s, rewards, color="tab:cyan", linewidth=0.5, alpha=0.3)
++    ax.plot(time_s, _smooth_signal(rewards), color="tab:cyan", linewidth=2.5,
++            label="Reward")
++    ax.set_xlabel("Time (s)")
++    ax.set_ylabel("Reward")
++    ax.set_title("Step Reward")
++    ax.legend(loc="best")
++    ax.grid(True, alpha=0.3)
++    fig.tight_layout()
++    fig.savefig(save_path, dpi=150, format="pdf")
++    plt.close(fig)
++
++
++def plot_summary_dashboard(time_s, states, goals, controls, save_path):
++    """All-in-one dashboard with 6 subplots."""
++    fig, axes = plt.subplots(3, 2, figsize=(14, 12), sharex=True)
++
++    # (0,0) Joint Position
++    ax = axes[0, 0]
++    ax.plot(time_s, states[:, 0], color="tab:blue", linewidth=0.5, alpha=0.3)
++    ax.plot(time_s, states[:, 1], color="tab:orange", linewidth=0.5, alpha=0.3)
++    ax.plot(time_s, _smooth_signal(states[:, 0]), color="tab:blue", linewidth=2.5,
++            label=r"$q_0$")
++    ax.plot(time_s, _smooth_signal(states[:, 1]), color="tab:orange", linewidth=2.5,
++            label=r"$q_1$")
++    ax.plot(time_s, goals[:, 0], "--", color="tab:blue", alpha=0.5, linewidth=1.2)
++    ax.plot(time_s, goals[:, 1], "--", color="tab:orange", alpha=0.5, linewidth=1.2)
++    ax.set_ylabel("Position (rad)")
++    ax.set_title("Joint Position")
++    ax.legend(loc="best", fontsize=8)
++    ax.grid(True, alpha=0.3)
++
++    # (0,1) Joint Velocity
++    ax = axes[0, 1]
++    ax.plot(time_s, states[:, 2], color="tab:green", linewidth=0.5, alpha=0.3)
++    ax.plot(time_s, states[:, 3], color="tab:red", linewidth=0.5, alpha=0.3)
++    ax.plot(time_s, _smooth_signal(states[:, 2]), color="tab:green", linewidth=2.5,
++            label=r"$\dot{q}_0$")
++    ax.plot(time_s, _smooth_signal(states[:, 3]), color="tab:red", linewidth=2.5,
++            label=r"$\dot{q}_1$")
++    ax.set_ylabel("Velocity (rad/s)")
++    ax.set_title("Joint Velocity")
++    ax.legend(loc="best", fontsize=8)
++    ax.grid(True, alpha=0.3)
++
++    # (1,0) Control Torque
++    ax = axes[1, 0]
++    ctrl_t = time_s[:-1] if controls.shape[0] == time_s.shape[0] - 1 else time_s
++    ax.plot(ctrl_t, controls[:, 0], color="tab:purple", linewidth=0.5, alpha=0.3)
++    ax.plot(ctrl_t, controls[:, 1], color="tab:brown", linewidth=0.5, alpha=0.3)
++    ax.plot(ctrl_t, _smooth_signal(controls[:, 0]), color="tab:purple", linewidth=2.5,
++            label=r"$\tau_0$")
++    ax.plot(ctrl_t, _smooth_signal(controls[:, 1]), color="tab:brown", linewidth=2.5,
++            label=r"$\tau_1$")
++    ax.set_ylabel("Torque (N m)")
++    ax.set_title("Control Torque")
++    ax.legend(loc="best", fontsize=8)
++    ax.grid(True, alpha=0.3)
++
++    # (1,1) Error Norm (log scale)
++    ax = axes[1, 1]
++    pos_err = np.linalg.norm(states[:, :2] - goals[:, :2], axis=1)
++    vel_err = np.linalg.norm(states[:, 2:] - goals[:, 2:], axis=1)
++    ax.plot(time_s, _smooth_signal(pos_err), color="tab:blue", linewidth=2.5,
++            label=r"$\|q - q^*\|$")
++    ax.plot(time_s, _smooth_signal(vel_err), color="tab:red", linewidth=2.5,
++            label=r"$\|\dot{q} - \dot{q}^*\|$")
++    ax.set_ylabel("Error Norm")
++    ax.set_title("Tracking Error")
++    ax.set_yscale("log")
++    ax.legend(loc="best", fontsize=8)
++    ax.grid(True, alpha=0.3)
++
++    # (2,0) End-Effector Trajectory
++    ax = axes[2, 0]
++    _, _, x_ee, y_ee = _end_effector_pos(states)
++    _, _, gx_ee, gy_ee = _end_effector_pos(goals)
++    ax.plot(x_ee, y_ee, color="tab:blue", linewidth=1.5, alpha=0.7, label="Actual")
++    ax.plot(x_ee[0], y_ee[0], "go", markersize=8, label="Start", zorder=5)
++    ax.plot(x_ee[-1], y_ee[-1], "rs", markersize=8, label="End", zorder=5)
++    ax.plot(gx_ee[-1], gy_ee[-1], "b*", markersize=12, label="Goal", zorder=5)
++    ax.set_xlabel("x (m)")
++    ax.set_ylabel("y (m)")
++    ax.set_title("End-Effector Path")
++    ax.set_aspect("equal")
++    ax.legend(loc="best", fontsize=8)
++    ax.grid(True, alpha=0.3)
++
++    # (2,1) Control Effort
++    ax = axes[2, 1]
++    u_norm = np.linalg.norm(controls, axis=1)
++    ax.plot(ctrl_t, u_norm, color="tab:purple", linewidth=0.5, alpha=0.3)
++    ax.plot(ctrl_t, _smooth_signal(u_norm), color="tab:purple", linewidth=2.5,
++            label=r"$\|u\|$")
++    ax.set_xlabel("Time (s)")
++    ax.set_ylabel("Torque Norm")
++    ax.set_title("Control Effort")
++    ax.legend(loc="best", fontsize=8)
++    ax.grid(True, alpha=0.3)
++
++    fig.suptitle("iLQR Two-Link Arm — Summary Dashboard", fontsize=14)
++    fig.tight_layout()
++    fig.savefig(save_path, dpi=150, format="pdf")
++    plt.close(fig)
++
++
++# ---------------------------------------------------------------------------
++# Main
++# ---------------------------------------------------------------------------
++
++def main():
++    parser = argparse.ArgumentParser(description="Generate plots from iLQR results.")
++    parser.add_argument("result_dir", type=str, help="Directory containing trajectory.npz")
++    args = parser.parse_args()
++
++    result_dir = args.result_dir
++    traj_path = os.path.join(result_dir, "two_link_arm_ilqr_trajectory.npz")
++
++    if not os.path.exists(traj_path):
++        print(f"Error: {traj_path} not found.")
++        sys.exit(1)
++
++    data = np.load(traj_path)
++    states = data["states"]
++    goals = data["goals"]
++    controls = data["controls"]
++    rewards = data["rewards"] if "rewards" in data else None
++    dt = 0.001  # TwoLinkArm default
++
++    n_steps = states.shape[0]
++    time_s = np.arange(n_steps, dtype=float) * dt
++    control_time = time_s[:-1] if controls.shape[0] == n_steps - 1 else time_s
++
++    print(f"Loaded {n_steps} states, {controls.shape[0]} controls from {traj_path}")
++    print(f"Generating plots in {result_dir}/ ...")
++
++    # Generate all plots
++    plot_joint_position(time_s, states, goals,
++                        os.path.join(result_dir, "plot_joint_position.pdf"))
++    plot_joint_velocity(time_s, states,
++                        os.path.join(result_dir, "plot_joint_velocity.pdf"))
++    plot_control_torque(control_time, controls,
++                        os.path.join(result_dir, "plot_control_torque.pdf"))
++    plot_error_norm(time_s, states, goals,
++                    os.path.join(result_dir, "plot_error_norm.pdf"))
++    plot_control_effort(control_time, controls, result_dir, prefix="plot")
++    plot_energy(time_s, states,
++                os.path.join(result_dir, "plot_energy.pdf"))
++    if rewards is not None:
++        reward_time = time_s[:-1] if rewards.shape[0] == n_steps - 1 else time_s[:rewards.shape[0]]
++        plot_reward(reward_time, rewards,
++                    os.path.join(result_dir, "plot_reward.pdf"))
++
++    print("Done! Generated plots:")
++    for f in sorted(os.listdir(result_dir)):
++        if f.endswith(".pdf"):
++            print(f"  {f}")
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/pyproject.toml b/pyproject.toml
+new file mode 100644
+index 0000000..0c8bd95
+--- /dev/null
++++ b/pyproject.toml
+@@ -0,0 +1,24 @@
++[project]
++name = "roboticscontrol"
++version = "0.1.0"
++description = "Add your description here"
++readme = "README.md"
++requires-python = "==3.11.13"
++dependencies = [
++    "gym>=0.26.2",
++    "gymnasium>=1.3.0",
++    "imageio[ffmpeg]>=2.37.3",
++    "keras>=3.14.0",
++    "matplotlib>=3.10.9",
++    "numpy==1.24.4",
++    "pygame>=2.6.1",
++    "pyglet>=2.1.14",
++    "scipy>=1.15.3",
++    "setuptools>=82.0.1",
++    "tensorflow>=2.17.1",
++    "tqdm>=4.67.3",
++]
++
++[[tool.uv.index]]
++url = "https://pypi.tuna.tsinghua.edu.cn/simple"
++default = true
+diff --git a/requirements.txt b/requirements.txt
+deleted file mode 100644
+index 5956079..0000000
+--- a/requirements.txt
++++ /dev/null
+@@ -1,8 +0,0 @@
+-setuptools==65.5.0
+-numpy==1.24.4
+-scipy
+-gym==0.21.0
+-tensorflow
+-keras
+-pyglet>=1.5.0,<2
+-imageio
+diff --git a/robotics_control/__init__.py b/robotics_control/__init__.py
+index 1d474f7..4fcdd36 100644
+--- a/robotics_control/__init__.py
++++ b/robotics_control/__init__.py
+@@ -1,4 +1,4 @@
+-from gym.envs.registration import register
++from gymnasium.envs.registration import register
+ import numpy as np
+ 
+ register(
+diff --git a/robotics_control/arm_env.py b/robotics_control/arm_env.py
+index f692d4c..4b0867f 100644
+--- a/robotics_control/arm_env.py
++++ b/robotics_control/arm_env.py
+@@ -3,11 +3,10 @@
+ import sys
+ 
+ import numpy as np
+-import gym
+-import gym.spaces
+-from gym.utils import seeding
++import gymnasium as gym
++import gymnasium.spaces
+ 
+-# Gym 0.21 Viewer sets `isopen` only after `get_window` succeeds. If window creation
++# Gymnasium Viewer sets `isopen` only after `get_window` succeeds. If window creation
+ # fails, __del__ still calls close(), which touches `isopen` and raises AttributeError.
+ _GYM_VIEWER_CLOSE_PATCHED = False
+ 
+@@ -16,7 +15,7 @@ def _patch_gym_viewer_close():
+     global _GYM_VIEWER_CLOSE_PATCHED
+     if _GYM_VIEWER_CLOSE_PATCHED:
+         return
+-    from gym.envs.classic_control import rendering
++    from gymnasium.envs.classic_control import rendering
+ 
+     def _safe_close(self):
+         if not getattr(self, "isopen", False):
+@@ -32,7 +31,10 @@ def _patch_gym_viewer_close():
+ 
+ class TwoLinkArmEnv(gym.Env):
+     DOF = 2
+-    metadata = {"render.modes": ["human", "rgb_array"], "video.frames_per_second": 15}
++    metadata = {
++        "render_modes": ["human", "rgb_array"],
++        "render_fps": 1000,
++    }
+ 
+     def __init__(
+         self,
+@@ -51,7 +53,9 @@ class TwoLinkArmEnv(gym.Env):
+         noise_free=True,
+         noise_mu=None,
+         noise_sigma=None,
++        render_mode=None,
+     ):
++        self.render_mode = render_mode
+         self.observation_space = gym.spaces.Box(
+             low=np.array([-np.pi, -np.pi, -np.inf, -np.inf]),
+             high=np.array([np.pi, np.pi, np.inf, np.inf]),
+@@ -97,39 +101,9 @@ class TwoLinkArmEnv(gym.Env):
+         self.noise_sigma = np.ones((self.DOF,)) if noise_sigma is None else noise_sigma
+ 
+         self.viewer = None
+-        self.seed()
++        self._np_random, self._np_random_seed = gym.utils.seeding.np_random(None)
+         self.reset()
+ 
+-    def seed(self, seed=None):
+-        self.np_random, seed = seeding.np_random(seed)
+-        return [seed]
+-
+-    def reset(self):
+-        return self._reset()
+-
+-    def step(self, action, dt=None):
+-        obs, reward, done, info = self._step(action, dt=dt)
+-        return obs, reward, done, info
+-
+-    def get_jacobian(self):
+-        jacobian = np.zeros((self.DOF, self.DOF))
+-        jacobian[0, 1] = self.l2 * -np.sin(self.q[0] + self.q[1])
+-        jacobian[1, 1] = self.l2 * np.cos(self.q[0] + self.q[1])
+-        jacobian[0, 0] = self.l1 * -np.sin(self.q[0]) + jacobian[0, 1]
+-        jacobian[1, 0] = self.l1 * np.cos(self.q[0]) + jacobian[1, 1]
+-        return jacobian
+-
+-    def _reset(self):
+-        if self._goal_q is None:
+-            self.goal_q = (2 * np.pi) * self.np_random.rand(self.DOF) - np.pi
+-        else:
+-            self.goal_q = self._goal_q.copy()
+-        self.q = self.init_q.copy()
+-        self.dq = self.init_dq.copy()
+-        self.t = 0.0
+-
+-        return np.hstack((self.q, self.dq))
+-
+     @property
+     def position(self):
+         return np.copy(self.q)
+@@ -151,15 +125,27 @@ class TwoLinkArmEnv(gym.Env):
+     def goal(self):
+         return np.hstack((self.goal_q, self.goal_dq))
+ 
+-    def _step(self, u, dt=None):
++    def reset(self, *, seed=None, options=None):
++        if seed is not None:
++            self._np_random, self._np_random_seed = gym.utils.seeding.np_random(seed)
++        if self._goal_q is None:
++            self.goal_q = (2 * np.pi) * self._np_random.random(self.DOF) - np.pi
++        else:
++            self.goal_q = self._goal_q.copy()
++        self.q = self.init_q.copy()
++        self.dq = self.init_dq.copy()
++        self.t = 0.0
++        obs = np.hstack((self.q, self.dq))
++        return obs, {}
++
++    def step(self, action, dt=None):
+         if dt is None:
+             dt = self.dt
+ 
++        u = np.asarray(action, dtype=float).copy()
+         if not self.noise_free:
+-            u0_noise = self.np_random.normal(self.noise_mu[0], self.noise_sigma[0])
+-            u1_noise = self.np_random.normal(self.noise_mu[1], self.noise_sigma[1])
+-            u[0] += u0_noise
+-            u[1] += u1_noise
++            u[0] += self._np_random.normal(self.noise_mu[0], self.noise_sigma[0])
++            u[1] += self._np_random.normal(self.noise_mu[1], self.noise_sigma[1])
+ 
+         u = np.clip(u, self.action_space.low, self.action_space.high)
+ 
+@@ -187,76 +173,62 @@ class TwoLinkArmEnv(gym.Env):
+ 
+         reward = -x_diff.dot(self.Q).dot(x_diff) - u.dot(self.R).dot(u)
+         reward *= self.dt
+-        done = False
++        terminated = False
+         if np.allclose(self.goal_q, self.q, atol=0.01) and np.allclose(
+             self.goal_dq, self.dq, atol=0.01
+         ):
+-            done = True
+-
+-        return np.hstack((self.q, self.dq)), reward, done, {}
+-
+-    def render(self, mode="human"):
+-        from gym.envs.classic_control import rendering
+-
+-        _patch_gym_viewer_close()
+-
+-        # Convention matches dynamics / get_jacobian: q0 is CCW from +x; q1 is
+-        # relative to link1. FK uses (l*cos(theta), l*sin(theta)) like standard math.
+-        l, r, t, b = 0, 1, 0.1, -0.1
+-        if self.viewer is None:
+-            self.viewer = rendering.Viewer(500, 500)
+-
+-            max_arm_length = 2 * self.l1 + self.l2
+-            bounds = 1.5 * max_arm_length
+-            self.viewer.set_bounds(-bounds, bounds, -bounds, bounds)
+-
+-        # add goal geoms
+-        link1_goal = rendering.FilledPolygon([(l, b), (l, t), (r, t), (r, b)])
+-        link1_goal_transform = rendering.Transform(
+-            rotation=self.goal_q[0], scale=(self.l1, 1.0)
+-        )
+-        link1_goal.add_attr(link1_goal_transform)
+-        link1_goal._color.vec4 = (1.0, 0.0, 0.0, 0.25)
+-        self.viewer.add_onetime(link1_goal)
+-
+-        p1_goal = [
+-            self.l1 * np.cos(self.goal_q[0]),
+-            self.l1 * np.sin(self.goal_q[0]),
+-        ]
+-
+-        link2_goal = rendering.FilledPolygon([(l, b), (l, t), (r, t), (r, b)])
+-        link2_goal_transform = rendering.Transform(
+-            rotation=self.goal_q[0] + self.goal_q[1],
+-            translation=tuple(p1_goal),
+-            scale=(self.l2, 1.0),
+-        )
+-        link2_goal.add_attr(link2_goal_transform)
+-        link2_goal._color.vec4 = (0.0, 0.0, 1.0, 0.25)
+-        self.viewer.add_onetime(link2_goal)
+-
+-        p1 = [self.l1 * np.cos(self.q[0]), self.l1 * np.sin(self.q[0])]
+-
+-        # add the arm geoms
+-        link1 = self.viewer.draw_polygon([(l, b), (l, t), (r, t), (r, b)])
+-        link1_transform = rendering.Transform(rotation=self.q[0], scale=(self.l1, 1.0))
+-        link1.add_attr(link1_transform)
+-        link1.set_color(1.0, 0.0, 0.0)
+-
+-        link2 = self.viewer.draw_polygon([(l, b), (l, t), (r, t), (r, b)])
+-        link2_transform = rendering.Transform(
+-            rotation=self.q[0] + self.q[1], translation=tuple(p1), scale=(self.l2, 1.0)
+-        )
+-        link2.add_attr(link2_transform)
+-        link2.set_color(0.0, 0.0, 1.0)
+-
+-        return self.viewer.render(return_rgb_array=(mode == "rgb_array"))
++            terminated = True
++
++        return np.hstack((self.q, self.dq)), reward, terminated, False, {}
++
++    def render(self):
++        import matplotlib
++        matplotlib.use('Agg')
++        import matplotlib.pyplot as plt
++
++        mode = self.render_mode or "rgb_array"
++
++        fig, ax = plt.subplots(figsize=(4, 4), dpi=100)
++        max_len = self.l1 + self.l2
++        bound = max_len * 1.5
++        ax.set_xlim(-bound, bound)
++        ax.set_ylim(-bound, bound)
++        ax.set_aspect('equal')
++        ax.grid(True, alpha=0.3)
++
++        # Goal arm (transparent blue)
++        gx1 = self.l1 * np.cos(self.goal_q[0])
++        gy1 = self.l1 * np.sin(self.goal_q[0])
++        gx2 = gx1 + self.l2 * np.cos(self.goal_q[0] + self.goal_q[1])
++        gy2 = gy1 + self.l2 * np.sin(self.goal_q[0] + self.goal_q[1])
++        ax.plot([0, gx1], [0, gy1], 'b-', linewidth=4, alpha=0.25)
++        ax.plot([gx1, gx2], [gy1, gy2], 'b-', linewidth=3, alpha=0.25)
++
++        # Current arm (red)
++        x1 = self.l1 * np.cos(self.q[0])
++        y1 = self.l1 * np.sin(self.q[0])
++        x2 = x1 + self.l2 * np.cos(self.q[0] + self.q[1])
++        y2 = y1 + self.l2 * np.sin(self.q[0] + self.q[1])
++        ax.plot([0, x1], [0, y1], 'r-', linewidth=4)
++        ax.plot([x1, x2], [y1, y2], 'r-', linewidth=3)
++
++        # Joints
++        ax.plot(0, 0, 'ko', markersize=8)
++        ax.plot(x1, y1, 'ko', markersize=6)
++        ax.plot(x2, y2, 'go', markersize=8)
++        ax.plot(gx2, gy2, 'b*', markersize=10, alpha=0.5)
++
++        if mode == "rgb_array":
++            fig.canvas.draw()
++            frame = np.asarray(fig.canvas.buffer_rgba())[:, :, :3]  # RGBA -> RGB
++            plt.close(fig)
++            return frame
++        else:
++            plt.close(fig)
++            return None
+ 
+     def close(self):
+-        if self.viewer is not None:
+-            viewer = self.viewer
+-            self.viewer = None
+-            _patch_gym_viewer_close()
+-            viewer.close()
++        pass
+ 
+ 
+ class LimitedTorqueTwoLinkArmEnv(TwoLinkArmEnv):
+diff --git a/robotics_control/arm_renderer.py b/robotics_control/arm_renderer.py
+new file mode 100644
+index 0000000..10525f4
+--- /dev/null
++++ b/robotics_control/arm_renderer.py
+@@ -0,0 +1,100 @@
++"""Matplotlib-based renderer for TwoLinkArm environment."""
++
++import numpy as np
++import matplotlib.pyplot as plt
++import matplotlib.patches as patches
++from matplotlib.transforms import Affine2D
++
++
++def render_arm_frame(q, goal_q, l1=0.5, l2=0.75, figsize=(4, 4)):
++    """Render a single frame of the two-link arm using matplotlib.
++
++    Parameters
++    ----------
++    q : array-like, shape (2,)
++        Current joint angles [q0, q1].
++    goal_q : array-like, shape (2,)
++        Goal joint angles.
++    l1, l2 : float
++        Link lengths.
++    figsize : tuple
++        Figure size.
++
++    Returns
++    -------
++    frame : np.ndarray, shape (size, size, 3), dtype uint8
++        RGB array of the rendered frame.
++    """
++    fig, ax = plt.subplots(figsize=figsize, dpi=100)
++    max_len = l1 + l2
++    bound = max_len * 1.5
++    ax.set_xlim(-bound, bound)
++    ax.set_ylim(-bound, bound)
++    ax.set_aspect('equal')
++    ax.grid(True, alpha=0.3)
++
++    # Goal arm (transparent)
++    gx1 = l1 * np.cos(goal_q[0])
++    gy1 = l1 * np.sin(goal_q[0])
++    gx2 = gx1 + l2 * np.cos(goal_q[0] + goal_q[1])
++    gy2 = gy1 + l2 * np.sin(goal_q[0] + goal_q[1])
++    ax.plot([0, gx1], [0, gy1], 'b-', linewidth=4, alpha=0.25)
++    ax.plot([gx1, gx2], [gy1, gy2], 'b-', linewidth=3, alpha=0.25)
++
++    # Current arm
++    x1 = l1 * np.cos(q[0])
++    y1 = l1 * np.sin(q[0])
++    x2 = x1 + l2 * np.cos(q[0] + q[1])
++    y2 = y1 + l2 * np.sin(q[0] + q[1])
++    ax.plot([0, x1], [0, y1], 'r-', linewidth=4)
++    ax.plot([x1, x2], [y1, y2], 'r-', linewidth=3)
++
++    # Joints
++    ax.plot(0, 0, 'ko', markersize=8)
++    ax.plot(x1, y1, 'ko', markersize=6)
++    ax.plot(x2, y2, 'go', markersize=8)
++
++    # Goal end effector
++    ax.plot(gx2, gy2, 'b*', markersize=10, alpha=0.5)
++
++    # Convert to RGB array
++    fig.canvas.draw()
++    renderer = fig.canvas.get_renderer()
++    frame = np.frombuffer(renderer.tostring_rgb(), dtype=np.uint8)
++    frame = frame.reshape(fig.canvas.get_width_height()[::-1] + (3,))
++    plt.close(fig)
++
++    return frame
++
++
++def create_arm_video(states, goals, video_path, fps=30, l1=0.5, l2=0.75):
++    """Create a video from arm trajectory using matplotlib.
++
++    Parameters
++    ----------
++    states : np.ndarray, shape (T, 4)
++        State trajectory [q0, q1, dq0, dq1].
++    goals : np.ndarray, shape (T, 4)
++        Goal trajectory.
++    video_path : str
++        Path to save video.
++    fps : int
++        Frames per second.
++    l1, l2 : float
++        Link lengths.
++    """
++    import imageio.v2 as imageio
++
++    frames = []
++    stride = max(1, int(round(1000 / fps / (1000 * states[0].shape[0] if False else 1))))
++
++    for i in range(0, len(states), max(1, len(states) // 200)):  # ~200 frames max
++        q = states[i][:2]
++        goal_q = goals[i][:2]
++        frame = render_arm_frame(q, goal_q, l1=l1, l2=l2)
++        frames.append(frame)
++
++    if frames:
++        imageio.mimsave(video_path, frames, fps=fps)
++        return True
++    return False
+diff --git a/robotics_control/cartpole.py b/robotics_control/cartpole.py
+index f11d75e..ee08efa 100644
+--- a/robotics_control/cartpole.py
++++ b/robotics_control/cartpole.py
+@@ -8,7 +8,7 @@ from pathlib import Path
+ import re
+ from typing import Tuple
+ 
+-import gym
++import gymnasium as gym
+ import numpy as np
+ 
+ 
+@@ -167,14 +167,9 @@ class SwingUpStabilizeCartPoleEnv(gym.Env):
+     def _angle_normalize(theta: float) -> float:
+         return ((theta + math.pi) % (2.0 * math.pi)) - math.pi
+ 
+-    def seed(self, seed=None):
+-        self.np_random, seed = gym.utils.seeding.np_random(seed)
+-        return [seed]
+-
+-    def reset(self, **kwargs):
+-        seed = kwargs.pop("seed", None)
++    def reset(self, *, seed=None, options=None):
+         if seed is not None:
+-            self.seed(seed)
++            self.np_random, _ = gym.utils.seeding.np_random(seed)
+         x = self.np_random.uniform(*self.init_x_range)
+         x_dot = self.np_random.uniform(*self.init_x_dot_range)
+         theta = math.pi + self.np_random.uniform(
+@@ -183,7 +178,7 @@ class SwingUpStabilizeCartPoleEnv(gym.Env):
+         theta_dot = self.np_random.uniform(*self.init_theta_dot_range)
+         self.state = np.array([x, x_dot, theta, theta_dot], dtype=np.float64)
+         self.steps = 0
+-        return self.state.astype(np.float32)
++        return self.state.astype(np.float32), {}
+ 
+     def step(self, action):
+         x, x_dot, theta, theta_dot = self.state
+@@ -225,7 +220,8 @@ class SwingUpStabilizeCartPoleEnv(gym.Env):
+         ):
+             reward += 2.0
+ 
+-        done = bool(abs(x) > self.x_threshold or self.steps >= self.max_episode_steps)
++        terminated = bool(abs(x) > self.x_threshold or self.steps >= self.max_episode_steps)
++        truncated = False
+         info = {
+             "theta_error": float(theta_err),
+             "x": float(x),
+@@ -235,16 +231,16 @@ class SwingUpStabilizeCartPoleEnv(gym.Env):
+                 abs(theta_err) < math.radians(10.0) and abs(theta_dot) < 0.4
+             ),
+         }
+-        return self.state.astype(np.float32), float(reward), done, info
++        return self.state.astype(np.float32), float(reward), terminated, truncated, info
+ 
+-    def render(self, mode="human"):
+-        # Reuse Gym CartPole renderer by syncing temporary env state.
+-        from gym.envs.classic_control.cartpole import CartPoleEnv
++    def render(self):
++        # Reuse Gymnasium CartPole renderer by syncing temporary env state.
++        from gymnasium.envs.classic_control.cartpole import CartPoleEnv
+ 
+         if not hasattr(self, "_render_env"):
+-            self._render_env = CartPoleEnv()
++            self._render_env = CartPoleEnv(render_mode=self.render_mode or "rgb_array")
+         self._render_env.state = self.state.copy()
+-        return self._render_env.render(mode=mode)
++        return self._render_env.render()
+ 
+     def close(self):
+         if hasattr(self, "_render_env"):
+@@ -306,10 +302,9 @@ class UprightStabilizeCartPoleEnv(SwingUpStabilizeCartPoleEnv):
+         self.init_theta_max_rad = math.radians(float(init_theta_max_deg))
+         self.down_theta_noise = 0.0  # Disable inherited down-hanging reset behavior.
+ 
+-    def reset(self, **kwargs):
+-        seed = kwargs.pop("seed", None)
++    def reset(self, *, seed=None, options=None):
+         if seed is not None:
+-            self.seed(seed)
++            self.np_random, _ = gym.utils.seeding.np_random(seed)
+         x = self.np_random.uniform(*self.init_x_range)
+         x_dot = self.np_random.uniform(*self.init_x_dot_range)
+         theta = self.np_random.uniform(
+@@ -318,4 +313,4 @@ class UprightStabilizeCartPoleEnv(SwingUpStabilizeCartPoleEnv):
+         theta_dot = self.np_random.uniform(*self.init_theta_dot_range)
+         self.state = np.array([x, x_dot, theta, theta_dot], dtype=np.float64)
+         self.steps = 0
+-        return self.state.astype(np.float32)
++        return self.state.astype(np.float32), {}
+diff --git a/robotics_control/ilqr.py b/robotics_control/ilqr.py
+index 2ea1f4e..434b89f 100644
+--- a/robotics_control/ilqr.py
++++ b/robotics_control/ilqr.py
+@@ -1,129 +1,184 @@
+ """LQR, iLQR and MPC.
+ 
+-Costs and goals follow ``arm_env.TwoLinkArmEnv``: stage cost penalizes
+-``x - goal`` with ``env.Q`` and ``u`` with ``env.R`` (same structure as the
+-environment reward, up to the conventional ``0.5`` factor used for smooth
+-derivatives in iLQR).
+-
+-Dynamics rollouts use ``env.step(u, dt)[0]`` after setting ``env.state = x``,
+-so Jacobians are taken w.r.t. the **discrete** one-step map
+-``x_{k+1} = f(x_k, u_k)``.
+-
+-Torques are projected with ``clip_action`` to ``env.action_space`` everywhere
+-(open-loop, line search, and dynamics) so planning matches
+-``LimitedTorqueTwoLinkArmEnv``. Optional ``r_scale`` / ``velocity_q_scale``
+-inflate ``R`` and the velocity block of ``Q`` inside the planner only, to reduce
+-chatter near the goal.
+-
+-By default ``calc_ilqr_input`` tracks a **minimum-jerk** joint-space reference
+-from the current state to ``env.goal`` over the horizon (``use_smooth_reference``).
+-Optional ``v_max`` / ``a_max`` lengthen that reference so analytic peak joint
+-speed and acceleration respect bounds. Pass ``x_ref`` explicitly or set
+-``use_smooth_reference=False`` to track the fixed goal only.
++Optimized implementation that uses standalone numpy dynamics functions
++instead of gym environment calls for the inner iLQR loop.  The gym env
++is still used at the top level for reset/step/render.
++
++Homework cost function:
++  - Intermediate: l(x,u) = ||u||^2  (no state tracking)
++  - Terminal:     l_f(x) = 10^4 * ||x - x*||^2
+ """
+ 
+ from __future__ import annotations
+ 
++import sys
++import time
+ import numpy as np
+ 
+ 
+-def _goal_vector(env) -> np.ndarray:
+-    """Stacked goal ``[q_goal, dq_goal]`` (matches ``arm_env.goal``)."""
+-    return np.asarray(env.goal, dtype=float).ravel()
+-
++# ---------------------------------------------------------------------------
++# Standalone vectorized dynamics (replicates arm_env._step without gym)
++# ---------------------------------------------------------------------------
+ 
+-def _action_bounds(env):
+-    """Return ``(low, high)`` arrays for torque clipping (``LimitedTorque`` etc.)."""
+-    core = getattr(env, "unwrapped", env)
+-    space = core.action_space
+-    low = np.asarray(space.low, dtype=float).ravel()
+-    high = np.asarray(space.high, dtype=float).ravel()
+-    return low, high
++def _dynamics_step(x, u, dt, K1, K2, K3, K4):
++    """One Euler step of the 2-link arm dynamics.
+ 
++    Works on single states (shape (4,)) or batches (shape (..., 4)).
++    """
++    q1 = x[..., 1]
++    C2 = np.cos(q1)
++    S2 = np.sin(q1)
+ 
+-def clip_action(env, u):
+-    """Clip ``u`` to ``env.action_space`` (finite limits or ±inf)."""
+-    u = np.asarray(u, dtype=float).ravel()
+-    low, high = _action_bounds(env)
+-    return np.clip(u, low, high)
++    M11 = K1 + K2 * C2
++    M12 = K3 + K4 * C2
++    M21 = M12
++    M22 = K3
+ 
++    dq0 = x[..., 2]
++    dq1 = x[..., 3]
+ 
+-def simulate_dynamics_next(env, x, u, dt=None):
+-    """One discrete step of the arm (same map as ``env.step`` on state ``x``).
++    H1 = -K2 * S2 * dq0 * dq1 - 0.5 * K2 * S2 * dq1 ** 2
++    H2 = 0.5 * K2 * S2 * dq0 ** 2
+ 
+-    Parameters
+-    ----------
+-    env: gym.core.Env
+-        Must expose ``state``, ``step``, and ``dt`` like ``TwoLinkArmEnv``.
+-    x: np.ndarray
+-        State ``[q, dq]`` before the step.
+-    u: np.ndarray
+-        Torque command.
+-    dt: float, optional
+-        Integration step; defaults to ``env.dt``.
++    denom = M12 ** 2 - M11 * M22
++    ddq1 = (H2 * M11 - H1 * M21 - M11 * u[..., 1] + M21 * u[..., 0]) / denom
++    ddq0 = (-H2 + u[..., 1] - M22 * ddq1) / M21
+ 
+-    Returns
+-    -------
+-    next_x: np.ndarray
+-        State after applying ``u`` for one step.
+-    """
+-    return np.asarray(next_x, dtype=float).ravel()
++    dq_new0 = dq0 + ddq0 * dt
++    dq_new1 = dq1 + ddq1 * dt
++    q_new0 = x[..., 0] + dq_new0 * dt
++    q_new1 = q1 + dq_new1 * dt
+ 
++    return np.stack([q_new0, q_new1, dq_new0, dq_new1], axis=-1)
+ 
+-def approximate_A(env, x, u, delta=1e-5, dt=1e-5):
+-    """Columns are :math:`\\partial \\dot{x} / \\partial x_j` at ``(x, u)``."""
+-    return A
+ 
++def _dynamics_rollout(x0, U, dt, K1, K2, K3, K4):
++    """Forward rollout from x0 using control sequence U.
+ 
+-def approximate_B(env, x, u, delta=1e-5, dt=1e-5):
+-    """Columns are :math:`\\partial \\dot{x} / \\partial u_j` at ``(x, u)``."""
+-    return B
++    Returns X of shape (tN+1, 4).
++    """
++    tN = U.shape[0]
++    n = x0.shape[-1]
++    X = np.empty((tN + 1, n))
++    X[0] = x0
++    for k in range(tN):
++        X[k + 1] = _dynamics_step(X[k], U[k], dt, K1, K2, K3, K4)
++    return X
+ 
+ 
+-def cost_inter(cost_env, x, u, Q=None, R=None, x_ref=None):
+-    """Intermediate cost: tracking + control penalty.
++def _dynamics_rollout_feedback(x0, K_gains, k_ff, X_nom, U_nom, dt,
++                                K1, K2, K3, K4, alpha):
++    """Line-search rollout with feedback gains.
+ 
+-    ``l(x,u) = 0.5 * (x-x_ref)^T Q (x-x_ref) + 0.5 * u^T R u``
++    U_new[k] = U_nom[k] + alpha * k_ff[k] + K_gains[k] @ (X_new[k] - X_nom[k])
+ 
+-    If ``x_ref`` is ``None``, uses ``env.goal`` as the setpoint (original
+-    behaviour).
++    Returns (X_new, U_new).
++    """
++    tN = U_nom.shape[0]
++    n = x0.shape[-1]
++    X_new = np.empty((tN + 1, n))
++    U_new = np.empty_like(U_nom)
++    X_new[0] = x0
++    for k in range(tN):
++        dx = X_new[k] - X_nom[k]
++        U_new[k] = U_nom[k] + alpha * k_ff[k] + K_gains[k] @ dx
++        X_new[k + 1] = _dynamics_step(X_new[k], U_new[k], dt, K1, K2, K3, K4)
++    return X_new, U_new
++
++
++# ---------------------------------------------------------------------------
++# Vectorized Jacobian computation via central finite differences
++# ---------------------------------------------------------------------------
++
++def _approximate_AB_batch(X, U, dt, K1, K2, K3, K4, delta=1e-5):
++    """Compute A_k = df/dx and B_k = df/du for all timesteps at once.
++
++    Returns A shape (tN, 4, 4) and B shape (tN, 4, 2).
++    """
++    tN = U.shape[0]
++    n = X.shape[1]
++    m = U.shape[1]
++    X_km1 = X[:-1]  # (tN, 4)
++
++    A = np.empty((tN, n, n))
++    for j in range(n):
++        e = np.zeros(n)
++        e[j] = delta
++        x_p = _dynamics_step(X_km1 + e, U, dt, K1, K2, K3, K4)
++        x_m = _dynamics_step(X_km1 - e, U, dt, K1, K2, K3, K4)
++        A[:, :, j] = (x_p - x_m) / (2.0 * delta)
++
++    B = np.empty((tN, n, m))
++    for j in range(m):
++        e = np.zeros(m)
++        e[j] = delta
++        x_p = _dynamics_step(X_km1, U + e, dt, K1, K2, K3, K4)
++        x_m = _dynamics_step(X_km1, U - e, dt, K1, K2, K3, K4)
++        B[:, :, j] = (x_p - x_m) / (2.0 * delta)
++
++    return A, B
++
++
++# ---------------------------------------------------------------------------
++# Cost functions
++# ---------------------------------------------------------------------------
++
++def _cost_intermediate_batch(U, R):
++    """Intermediate cost for all timesteps: l(x,u) = u^T R u.
++
++    Returns costs (tN,), l_u (tN, m), l_uu (tN, m, m).
++    l_x, l_xx, l_ux are zero (no state dependence).
+     """
+-    return cost, l_x, l_xx, l_u, l_uu, l_ux
++    # u^T R u for each timestep
++    Ru = U @ R  # (tN, m)
++    costs = 0.5 * np.sum(U * Ru, axis=1)  # (tN,)
++    return costs, Ru, np.tile(R, (U.shape[0], 1, 1))
+ 
+ 
+-def cost_final(cost_env, x, Q=None, x_ref=None):
+-    """Terminal cost ``0.5 * (x-x_ref)^T Q (x-x_ref)``.
++def _cost_terminal(x_last, x_goal, Q_terminal):
++    """Terminal cost: 0.5 * (x - x*)^T Q_f (x - x*).
+ 
+-    If ``x_ref`` is ``None``, uses ``env.goal``.
++    Returns scalar cost, gradient (n,), Hessian (n, n).
+     """
+-    return cost, l_x, l_xx
++    dx = x_last - x_goal
++    cost = 0.5 * dx @ Q_terminal @ dx
++    l_f_x = Q_terminal @ dx
++    return cost, l_f_x, Q_terminal
+ 
+ 
+-def simulate(cost_env, sim_env, x0, U, Q=None, R=None, X_ref=None, x_terminal=None):
+-    """Roll out open-loop ``U`` from ``x0`` on ``sim_env``; return cost and trajectory.
++def _compute_trajectory_cost(X, U, R, Q_terminal, x_goal):
++    """Total trajectory cost: sum of intermediate + terminal."""
++    inter_costs, _, _ = _cost_intermediate_batch(U, R)
++    term_cost, _, _ = _cost_terminal(X[-1], x_goal, Q_terminal)
++    return float(np.sum(inter_costs) + term_cost)
+ 
+-    Parameters
+-    ----------
+-    cost_env: gym.core.Env
+-        Used for ``Q``, ``R``, and setpoints in cost.
+-    sim_env: gym.core.Env
+-        Used for dynamics (should be noise-free / separate instance).
+-    X_ref: np.ndarray, optional
+-        If given, shape ``(tN+1, n)``; stage ``k`` uses ``X_ref[k]``.
+-    x_terminal: np.ndarray, optional
+-        Terminal setpoint; if ``None`` and ``X_ref`` is set, uses ``X_ref[-1]``;
+-        if both ``None``, uses ``env.goal``.
+-    x0: np.ndarray
+-    U: np.ndarray, shape ``(tN, action_dim)``
+ 
+-    Returns
+-    -------
+-    total_cost: float
+-    X: np.ndarray, shape ``(tN+1, state_dim)``
+-    """
+-    return 0, np.zeros(2)
++# ---------------------------------------------------------------------------
++# Public helpers (kept for backward compatibility)
++# ---------------------------------------------------------------------------
++
++def _goal_vector(env) -> np.ndarray:
++    """Stacked goal ``[q_goal, dq_goal]`` (matches ``arm_env.goal``)."""
++    core = getattr(env, "unwrapped", env)
++    return np.asarray(core.goal, dtype=float).ravel()
++
++
++def clip_action(env, u):
++    """Clip ``u`` to ``env.action_space`` (finite limits or +-inf)."""
++    u = np.asarray(u, dtype=float)
++    core = getattr(env, "unwrapped", env)
++    space = core.action_space
++    low = np.asarray(space.low, dtype=float)
++    high = np.asarray(space.high, dtype=float)
++    if u.ndim == 2:
++        return np.clip(u, low[None, :], high[None, :])
++    return np.clip(u.ravel(), low.ravel(), high.ravel())
+ 
+ 
++# ---------------------------------------------------------------------------
++# Main iLQR solver
++# ---------------------------------------------------------------------------
++
+ def calc_ilqr_input(
+     env,
+     sim_env,
+@@ -132,24 +187,25 @@ def calc_ilqr_input(
+     tol=1e-2,
+     reg=1e-2,
+     line_search_alphas=None,
+-    r_scale=6.0,
+-    velocity_q_scale=18.0,
++    r_scale=0.01,
++    velocity_q_scale=1.0,
+     u_init=None,
+     x_ref=None,
+     use_smooth_reference: bool = True,
+     v_max=None,
+     a_max=None,
+ ):
+-    """Iterative LQR: returns a torque sequence ``U`` of length ``tN``.
++    """Iterative LQR: returns a torque sequence U of length tN.
+ 
+-    Uses ``env.state`` as the initial ``x0``, and ``env`` for cost matrices /
+-    goal. All dynamics Jacobians and rollouts use ``sim_env`` so the real
+-    ``env`` is not mutated during planning (copy ``sim_env`` first).
++    Optimized version: uses standalone numpy dynamics instead of gym env
++    calls for the inner loop.  The gym env is only used to extract
++    parameters (K1-K4, dt, Q, R, goal) and for action clipping.
+ 
+     Parameters
+     ----------
+-    env, sim_env: gym.core.Env
+-        ``TwoLinkArmEnv`` (or compatible API).
++    env, sim_env
++        TwoLinkArmEnv (or compatible API).  ``sim_env`` is kept for
++        backward compatibility but is no longer used internally.
+     tN: int
+         Horizon (number of controls).
+     max_iter: int
+@@ -157,31 +213,179 @@ def calc_ilqr_input(
+     tol: float
+         Stop when cost improvement falls below this threshold.
+     reg: float
+-        Tikhonov term on ``Q_uu`` for stable inversion (larger → smoother gains).
++        Tikhonov term on Q_uu for stable inversion.
+     line_search_alphas: iterable of float, optional
+-        Backtracking coefficients applied to feedforward ``k``.
++        Backtracking coefficients applied to feedforward k.
+     r_scale: float
+-        Multiplier on ``env.R`` in the planner (``>1`` discourages large torques).
++        Multiplier on R in the planner (unused in homework config).
+     velocity_q_scale: float
+-        Multiplier on the velocity block of ``Q`` (``>1`` damps endpoint oscillation).
++        Multiplier on velocity block of Q (unused in homework config).
+     u_init: np.ndarray, optional
+-        Warm-start control sequence, shape ``(tN, m)`` (will be clipped).
++        Warm-start control sequence, shape (tN, m).
+     x_ref: np.ndarray, optional
+-        Reference state trajectory, shape ``(tN+1, state_dim)``. Overrides
+-        ``use_smooth_reference`` when given.
++        Reference state trajectory, shape (tN+1, state_dim).
+     use_smooth_reference: bool
+-        If True (default) and ``x_ref`` is not given, build a minimum-jerk
+-        joint-space reference from ``x0`` to ``env.goal`` over the horizon.
+-    v_max: float or array, optional
+-        Per-joint max ``|dq|`` (rad/s) for the built-in reference. ``None`` =
+-        unconstrained.
+-    a_max: float or array, optional
+-        Per-joint max ``|ddot{q}|`` (rad/s²) for the built-in reference.
++        If True and x_ref not given, build minimum-jerk reference.
++    v_max, a_max: unused, kept for API compatibility.
+ 
+     Returns
+     -------
+-    U: np.ndarray, shape ``(tN, action_dim)``
++    U: np.ndarray, shape (tN, action_dim)
+     """
+-    U = np.zeros(2)
++    core = getattr(env, "unwrapped", env)
++    n = env.observation_space.shape[0]  # state dim = 4
++    m = env.action_space.shape[0]       # action dim = 2
++
++    # Extract dynamics parameters from env
++    K1, K2, K3, K4 = core.K1, core.K2, core.K3, core.K4
++    dt = core.dt
++
++    x0 = np.asarray(core.state, dtype=float).ravel()
++    x_goal = _goal_vector(core)
++
++    # ------------------------------------------------------------------
++    # Cost matrices (homework specification)
++    # ------------------------------------------------------------------
++    # Intermediate cost: ||u||^2 only  (no state tracking)
++    R_planner = np.eye(m) * r_scale
++    # Terminal cost: 10^4 * ||x - x*||^2
++    Q_terminal = np.eye(n) * 1e4
++
++    # ------------------------------------------------------------------
++    # Build reference trajectory
++    # ------------------------------------------------------------------
++    if x_ref is not None:
++        X_ref = np.asarray(x_ref, dtype=float)
++    elif use_smooth_reference:
++        t_arr = np.linspace(0, 1, tN + 1)
++        dx = x_goal[:core.DOF] - x0[:core.DOF]
++        s = 10 * t_arr**3 - 15 * t_arr**4 + 6 * t_arr**5
++        ds = 30 * t_arr**2 - 60 * t_arr**3 + 30 * t_arr**4
++        X_ref = np.zeros((tN + 1, n))
++        for i in range(core.DOF):
++            X_ref[:, i] = x0[i] + dx[i] * s
++            X_ref[:, core.DOF + i] = dx[i] * ds / (tN * core.dt)
++    else:
++        X_ref = np.tile(x_goal, (tN + 1, 1))
++
++    # ------------------------------------------------------------------
++    # Initialize control sequence
++    # ------------------------------------------------------------------
++    if u_init is not None:
++        U = clip_action(env, np.asarray(u_init, dtype=float))
++    else:
++        U = np.zeros((tN, m))
++
++    if line_search_alphas is None:
++        line_search_alphas = 0.5 ** np.arange(10)
++
++    current_reg = reg
++    print_interval = max(1, max_iter // 20)
++
++    # ------------------------------------------------------------------
++    # Main iLQR loop
++    # ------------------------------------------------------------------
++    for iteration in range(max_iter):
++        t_start = time.time()
++
++        # Forward rollout (vectorized, no gym calls)
++        X = _dynamics_rollout(x0, U, dt, K1, K2, K3, K4)
++        J = _compute_trajectory_cost(X, U, R_planner, Q_terminal, x_goal)
++
++        # Linearize dynamics (vectorized)
++        A_arr, B_arr = _approximate_AB_batch(X, U, dt, K1, K2, K3, K4)
++
++        # Cost gradients (homework: ||u||^2 only, no state cost)
++        l_u_arr = U @ R_planner           # (tN, m)
++        l_uu_arr = np.tile(R_planner, (tN, 1, 1))  # (tN, m, m)
++        # l_x, l_xx, l_ux are all zero -- no state cost at intermediate steps
++
++        # Terminal cost gradients
++        _, l_f_x, l_f_xx = _cost_terminal(X[tN], x_goal, Q_terminal)
++
++        # Backward pass
++        V_x = l_f_x
++        V_xx = l_f_xx
++
++        K_list = []
++        k_list = []
++        expected_decrease = 0.0
++
++        backward_success = True
++        for k in range(tN - 1, -1, -1):
++            A_k = A_arr[k]
++            B_k = B_arr[k]
++
++            Q_x = A_k.T @ V_x                        # l_x = 0
++            Q_u = l_u_arr[k] + B_k.T @ V_x
++            Q_xx = A_k.T @ V_xx @ A_k                 # l_xx = 0
++            Q_uu = l_uu_arr[k] + B_k.T @ V_xx @ B_k
++            Q_ux = B_k.T @ V_xx @ A_k                 # l_ux = 0
++
++            Q_uu_reg = Q_uu + current_reg * np.eye(m)
++
++            try:
++                L = np.linalg.cholesky(Q_uu_reg)
++                K = -np.linalg.solve(L.T, np.linalg.solve(L, Q_ux))
++                k_ff = -np.linalg.solve(L.T, np.linalg.solve(L, Q_u))
++            except np.linalg.LinAlgError:
++                backward_success = False
++                break
++
++            K_list.insert(0, K)
++            k_list.insert(0, k_ff)
++
++            expected_decrease += float(k_ff @ Q_u)
++
++            V_x = Q_x + K.T @ Q_uu @ k_ff + K.T @ Q_u + Q_ux.T @ k_ff
++            V_xx = Q_xx + K.T @ Q_uu @ K + K.T @ Q_ux + Q_ux.T @ K
++            V_xx = 0.5 * (V_xx + V_xx.T)
++
++        if not backward_success:
++            current_reg = max(current_reg * 2.0, 1e-8)
++            continue
++
++        # Line search
++        best_J = J
++        best_U = U.copy()
++        improved = False
++
++        for alpha in line_search_alphas:
++            X_new, U_new = _dynamics_rollout_feedback(
++                x0, K_list, k_list, X, U, dt, K1, K2, K3, K4, alpha
++            )
++            J_new = _compute_trajectory_cost(
++                X_new, U_new, R_planner, Q_terminal, x_goal
++            )
++
++            if J_new < best_J:
++                best_J = J_new
++                best_U = U_new.copy()
++                improved = True
++                break
++
++        if improved:
++            U = best_U
++            current_reg = max(current_reg * 0.5, 1e-10)
++
++            if abs(J - best_J) < tol:
++                # print(f"  [iLQR] Converged at iter {iteration}: "
++                    #   f"dJ={abs(J - best_J):.6f} < tol={tol}")
++                break
++        else:
++            current_reg = min(current_reg * 2.0, 1e4)
++            if current_reg >= 1e4:
++                # print(f"  [iLQR] Regularization saturated at iter {iteration}")
++                break
++
++        # Progress logging
++        if (iteration + 1) % print_interval == 0 or iteration == 0:
++            elapsed = time.time() - t_start
++            dJ = abs(J - best_J) if improved else float('inf')
++            x_err = np.linalg.norm(X[tN][:core.DOF] - x_goal[:core.DOF])
++            # print(f"  [iLQR] iter {iteration+1}/{max_iter} | "
++            #       f"J={J:.2f} | dJ={dJ:.6f} | reg={current_reg:.2e} | "
++            #       f"x_err={x_err:.4f} | {elapsed:.2f}s")
++            sys.stdout.flush()
+ 
+     return U
+diff --git a/robotics_control/pid.py b/robotics_control/pid.py
+index d07878e..53fd95a 100644
+--- a/robotics_control/pid.py
++++ b/robotics_control/pid.py
+@@ -49,3 +49,115 @@ class PIDController(ABC):
+     def compute(self, observation: np.ndarray, dt: float) -> int:
+         """Return control action for current observation."""
+         return 0
++
++
++class CartPolePIDController(PIDController):
++    """
++    Dual-loop PID controller for UprightStabilizeCartPoleEnv.
++
++    Primary loop: PD on pole angle theta (error = theta - 0).
++    Secondary loop: PD on cart position x (error = x - 0).
++    Optional integral terms with anti-windup clamping.
++    Hysteresis deadband reduces action chattering near zero force.
++    """
++
++    def __init__(
++        self,
++        theta_kp: float = 50.0,
++        theta_kd: float = 20.0,
++        theta_ki: float = 0.0,
++        x_kp: float = 2.0,
++        x_kd: float = 3.0,
++        x_ki: float = 0.0,
++        force_limit: float = 10.0,
++        integral_limit: float = 5.0,
++        hysteresis: float = 0.5,
++        **kwargs,
++    ):
++        super().__init__(**kwargs)
++        self.theta_kp = theta_kp
++        self.theta_kd = theta_kd
++        self.theta_ki = theta_ki
++        self.x_kp = x_kp
++        self.x_kd = x_kd
++        self.x_ki = x_ki
++        self.force_limit = force_limit
++        self.integral_limit = integral_limit
++        self.hysteresis = hysteresis
++
++        self._theta_integral = 0.0
++        self._x_integral = 0.0
++        self._prev_theta = 0.0
++        self._prev_x = 0.0
++        self._initialized = False
++        self._last_force = 0.0
++
++    def reset(self) -> None:
++        """Clear all integrator and derivative memory."""
++        self._theta_integral = 0.0
++        self._x_integral = 0.0
++        self._prev_theta = 0.0
++        self._prev_x = 0.0
++        self._initialized = False
++        self._last_force = 0.0
++
++    def compute(self, observation: np.ndarray, dt: float) -> int:
++        """
++        Compute discrete action from observation.
++
++        Args:
++            observation: [x, x_dot, theta, theta_dot].
++            dt: Timestep in seconds.
++
++        Returns:
++            0 for push left, 1 for push right.
++        """
++        x, x_dot, theta, theta_dot = observation[:4]
++
++        if not self._initialized:
++            self._prev_theta = theta
++            self._prev_x = x
++            self._initialized = True
++
++        # Angle PD + I
++        theta_error = theta
++        theta_deriv = (theta - self._prev_theta) / dt if dt > 0 else 0.0
++        self._theta_integral += theta_error * dt
++        self._theta_integral = np.clip(
++            self._theta_integral, -self.integral_limit, self.integral_limit
++        )
++        f_angle = (
++            self.theta_kp * theta_error
++            + self.theta_kd * theta_dot
++            + self.theta_ki * self._theta_integral
++        )
++
++        # Cart PD + I
++        x_error = x
++        x_deriv = (x - self._prev_x) / dt if dt > 0 else 0.0
++        self._x_integral += x_error * dt
++        self._x_integral = np.clip(
++            self._x_integral, -self.integral_limit, self.integral_limit
++        )
++        f_cart = (
++            self.x_kp * x_error
++            + self.x_kd * x_dot
++            + self.x_ki * self._x_integral
++        )
++
++        # Total force: angle stabilization takes priority; cart centering is secondary
++        force = f_angle + f_cart
++
++        # Hysteresis deadband to reduce chattering
++        if abs(force) < self.hysteresis:
++            force = 0.0
++
++        # Clip to force limit
++        force = np.clip(force, -self.force_limit, self.force_limit)
++
++        self._prev_theta = theta
++        self._prev_x = x
++        self._last_force = float(force)
++
++        # Map to discrete action: right (1) if force >= 0, left (0) otherwise
++        return 1 if force >= 0 else 0
+diff --git a/run_ilqr.sh b/run_ilqr.sh
+new file mode 100644
+index 0000000..485881d
+--- /dev/null
++++ b/run_ilqr.sh
+@@ -0,0 +1,52 @@
++#!/bin/bash
++
++# iLQR Two-Link Arm Experiment Runner
++# All parameters hardcoded below. Edit directly to change.
++
++set -e
++
++# ---- Hyperparameters ----
++SEED=2025
++SIM_TIME=4
++EVAL_EPISODES=1
++DEMO_SEED=2025
++R_SCALE=0.001
++
++# ---- Environments ----
++ENVIRONMENTS=(
++    "TwoLinkArm-v0"
++    "TwoLinkArm-limited-torque-v0"
++    "TwoLinkArm-v1"
++    "TwoLinkArm-limited-torque-v1"
++)
++
++echo "=========================================="
++echo "  iLQR Two-Link Arm Experiments"
++echo "=========================================="
++echo "  Seed:           $SEED"
++echo "  Sim time:       ${SIM_TIME}s"
++echo "  Eval episodes:  $EVAL_EPISODES"
++echo "  Environments:   ${ENVIRONMENTS[*]}"
++echo "=========================================="
++
++for ENV_NAME in "${ENVIRONMENTS[@]}"; do
++    echo ""
++    echo "------------------------------------------"
++    echo "Testing: $ENV_NAME"
++    echo "------------------------------------------"
++
++    python dualarm_entry.py \
++        --env-name "$ENV_NAME" \
++        --eval-episodes "$EVAL_EPISODES" \
++        --seed "$SEED" \
++        --demo-seed "$DEMO_SEED" \
++        --sim-time "$SIM_TIME" \
++        --r-scale $R_SCALE
++
++    echo "Completed: $ENV_NAME"
++done
++
++echo ""
++echo "=========================================="
++echo "  All done! Results: $RESULT_DIR/"
++echo "=========================================="
+diff --git a/run_ilqr_ablation.sh b/run_ilqr_ablation.sh
+new file mode 100644
+index 0000000..0bbf78c
+--- /dev/null
++++ b/run_ilqr_ablation.sh
+@@ -0,0 +1,67 @@
++#!/bin/bash
++
++# iLQR Ablation: 10 R_SCALE values × 1 environment, with timing
++# Records runtime per r_scale to demonstrate speed optimization.
++
++set -e
++
++# ---- Hyperparameters ----
++SEED=2025
++SIM_TIME=4
++EVAL_EPISODES=1
++DEMO_SEED=2025
++ENV_NAMES=(
++    "TwoLinkArm-v0"
++    "TwoLinkArm-limited-torque-v0"
++)
++
++# ---- R_SCALE values (10 points, log-spaced) ----
++R_SCALES=(0.001 0.002 0.005 0.01 0.02 0.05 0.1 0.2 0.5 1.0)
++
++echo "=========================================="
++echo "  iLQR R_SCALE Ablation with Timing"
++echo "=========================================="
++echo "  Environments: ${ENV_NAMES[*]}"
++echo "  Sim time:     ${SIM_TIME}s"
++echo "  R_SCALES:     ${R_SCALES[*]}"
++echo "=========================================="
++
++mkdir -p results
++TIMING_FILE="results/ablation_timing.csv"
++echo "env_name,r_scale,elapsed_sec" > "$TIMING_FILE"
++
++for ENV_NAME in "${ENV_NAMES[@]}"; do
++    echo ""
++    echo "=========================================="
++    echo "  Environment: $ENV_NAME"
++    echo "=========================================="
++
++    for R_SCALE in "${R_SCALES[@]}"; do
++        echo ""
++        echo "------------------------------------------"
++        echo "r_scale = $R_SCALE"
++        echo "------------------------------------------"
++
++        START_TIME=$(date +%s.%N)
++
++        python dualarm_entry.py \
++            --env-name "$ENV_NAME" \
++            --eval-episodes "$EVAL_EPISODES" \
++            --seed "$SEED" \
++            --demo-seed "$DEMO_SEED" \
++            --sim-time "$SIM_TIME" \
++            --r-scale "$R_SCALE"
++
++        END_TIME=$(date +%s.%N)
++        ELAPSED=$(python3 -c "print(round($END_TIME - $START_TIME, 2))")
++
++        echo "$ENV_NAME,$R_SCALE,$ELAPSED" >> "$TIMING_FILE"
++        echo "r_scale=$R_SCALE | elapsed=${ELAPSED}s"
++    done
++done
++
++echo ""
++echo "=========================================="
++echo "  Ablation complete! Timing saved to $TIMING_FILE"
++echo "=========================================="
++cat "$TIMING_FILE"
