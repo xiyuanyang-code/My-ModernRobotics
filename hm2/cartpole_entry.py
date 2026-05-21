@@ -23,20 +23,14 @@ DEFAULT_DT = 0.02
 DEFAULT_MAX_STEPS = 1000
 
 
-def _safe_reset(env):
-    out = env.reset()
-    if isinstance(out, tuple):
-        return out[0]
-    return out
+def _safe_reset(env, seed=None):
+    obs, info = env.reset(seed=seed)
+    return obs
 
 
 def _safe_step(env, action):
-    out = env.step(action)
-    if len(out) == 5:
-        obs, reward, terminated, truncated, info = out
-        done = bool(terminated or truncated)
-        return obs, reward, done, info
-    obs, reward, done, info = out
+    obs, reward, terminated, truncated, info = env.step(action)
+    done = bool(terminated or truncated)
     return obs, reward, done, info
 
 
@@ -346,7 +340,7 @@ def run_episode(params, seed, record=False, max_steps=DEFAULT_MAX_STEPS):
     stable_count = 0
 
     if record:
-        first_frame = env.render(mode=render_mode)
+        first_frame = env.render()
         if first_frame is not None:
             video_frames.append(first_frame)
 
@@ -362,7 +356,7 @@ def run_episode(params, seed, record=False, max_steps=DEFAULT_MAX_STEPS):
         stable_count += int(bool(info.get("is_stable_upright", False)))
 
         if record:
-            frame = env.render(mode=render_mode)
+            frame = env.render()
             if frame is not None:
                 video_frames.append(frame)
 

@@ -213,3 +213,5 @@ pyrightconfig.json
 # End of https://www.toptal.com/developers/gitignore/api/macos,python
 HM.md 
 paper.tex
+results
+iLQR_math.md

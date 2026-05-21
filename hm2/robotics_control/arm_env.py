@@ -3,11 +3,10 @@
 import sys
 
 import numpy as np
-import gym
-import gym.spaces
-from gym.utils import seeding
+import gymnasium as gym
+import gymnasium.spaces
 
-# Gym 0.21 Viewer sets `isopen` only after `get_window` succeeds. If window creation
+# Gymnasium Viewer sets `isopen` only after `get_window` succeeds. If window creation
 # fails, __del__ still calls close(), which touches `isopen` and raises AttributeError.
 _GYM_VIEWER_CLOSE_PATCHED = False
 
@@ -16,7 +15,7 @@ def _patch_gym_viewer_close():
     global _GYM_VIEWER_CLOSE_PATCHED
     if _GYM_VIEWER_CLOSE_PATCHED:
         return
-    from gym.envs.classic_control import rendering
+    from gymnasium.envs.classic_control import rendering
 
     def _safe_close(self):
         if not getattr(self, "isopen", False):
@@ -32,7 +31,10 @@ def _patch_gym_viewer_close():
 
 class TwoLinkArmEnv(gym.Env):
     DOF = 2
-    metadata = {"render.modes": ["human", "rgb_array"], "video.frames_per_second": 15}
+    metadata = {
+        "render_modes": ["human", "rgb_array"],
+        "render_fps": 1000,
+    }
 
     def __init__(
         self,
@@ -51,7 +53,9 @@ class TwoLinkArmEnv(gym.Env):
         noise_free=True,
         noise_mu=None,
         noise_sigma=None,
+        render_mode=None,
     ):
+        self.render_mode = render_mode
         self.observation_space = gym.spaces.Box(
             low=np.array([-np.pi, -np.pi, -np.inf, -np.inf]),
             high=np.array([np.pi, np.pi, np.inf, np.inf]),
@@ -97,38 +101,8 @@ class TwoLinkArmEnv(gym.Env):
         self.noise_sigma = np.ones((self.DOF,)) if noise_sigma is None else noise_sigma
 
         self.viewer = None
-        self.seed()
+        self._np_random, self._np_random_seed = gym.utils.seeding.np_random(None)
         self.reset()
-
-    def seed(self, seed=None):
-        self.np_random, seed = seeding.np_random(seed)
-        return [seed]
-
-    def reset(self):
-        return self._reset()
-
-    def step(self, action, dt=None):
-        obs, reward, done, info = self._step(action, dt=dt)
-        return obs, reward, done, info
-
-    def get_jacobian(self):
-        jacobian = np.zeros((self.DOF, self.DOF))
-        jacobian[0, 1] = self.l2 * -np.sin(self.q[0] + self.q[1])
-        jacobian[1, 1] = self.l2 * np.cos(self.q[0] + self.q[1])
-        jacobian[0, 0] = self.l1 * -np.sin(self.q[0]) + jacobian[0, 1]
-        jacobian[1, 0] = self.l1 * np.cos(self.q[0]) + jacobian[1, 1]
-        return jacobian
-
-    def _reset(self):
-        if self._goal_q is None:
-            self.goal_q = (2 * np.pi) * self.np_random.rand(self.DOF) - np.pi
-        else:
-            self.goal_q = self._goal_q.copy()
-        self.q = self.init_q.copy()
-        self.dq = self.init_dq.copy()
-        self.t = 0.0
-
-        return np.hstack((self.q, self.dq))
 
     @property
     def position(self):
@@ -151,15 +125,27 @@ class TwoLinkArmEnv(gym.Env):
     def goal(self):
         return np.hstack((self.goal_q, self.goal_dq))
 
-    def _step(self, u, dt=None):
+    def reset(self, *, seed=None, options=None):
+        if seed is not None:
+            self._np_random, self._np_random_seed = gym.utils.seeding.np_random(seed)
+        if self._goal_q is None:
+            self.goal_q = (2 * np.pi) * self._np_random.random(self.DOF) - np.pi
+        else:
+            self.goal_q = self._goal_q.copy()
+        self.q = self.init_q.copy()
+        self.dq = self.init_dq.copy()
+        self.t = 0.0
+        obs = np.hstack((self.q, self.dq))
+        return obs, {}
+
+    def step(self, action, dt=None):
         if dt is None:
             dt = self.dt
 
+        u = np.asarray(action, dtype=float).copy()
         if not self.noise_free:
-            u0_noise = self.np_random.normal(self.noise_mu[0], self.noise_sigma[0])
-            u1_noise = self.np_random.normal(self.noise_mu[1], self.noise_sigma[1])
-            u[0] += u0_noise
-            u[1] += u1_noise
+            u[0] += self._np_random.normal(self.noise_mu[0], self.noise_sigma[0])
+            u[1] += self._np_random.normal(self.noise_mu[1], self.noise_sigma[1])
 
         u = np.clip(u, self.action_space.low, self.action_space.high)
 
@@ -187,76 +173,62 @@ class TwoLinkArmEnv(gym.Env):
 
         reward = -x_diff.dot(self.Q).dot(x_diff) - u.dot(self.R).dot(u)
         reward *= self.dt
-        done = False
+        terminated = False
         if np.allclose(self.goal_q, self.q, atol=0.01) and np.allclose(
             self.goal_dq, self.dq, atol=0.01
         ):
-            done = True
+            terminated = True
 
-        return np.hstack((self.q, self.dq)), reward, done, {}
+        return np.hstack((self.q, self.dq)), reward, terminated, False, {}
 
-    def render(self, mode="human"):
-        from gym.envs.classic_control import rendering
+    def render(self):
+        import matplotlib
+        matplotlib.use('Agg')
+        import matplotlib.pyplot as plt
 
-        _patch_gym_viewer_close()
+        mode = self.render_mode or "rgb_array"
 
-        # Convention matches dynamics / get_jacobian: q0 is CCW from +x; q1 is
-        # relative to link1. FK uses (l*cos(theta), l*sin(theta)) like standard math.
-        l, r, t, b = 0, 1, 0.1, -0.1
-        if self.viewer is None:
-            self.viewer = rendering.Viewer(500, 500)
+        fig, ax = plt.subplots(figsize=(4, 4), dpi=100)
+        max_len = self.l1 + self.l2
+        bound = max_len * 1.5
+        ax.set_xlim(-bound, bound)
+        ax.set_ylim(-bound, bound)
+        ax.set_aspect('equal')
+        ax.grid(True, alpha=0.3)
 
-            max_arm_length = 2 * self.l1 + self.l2
-            bounds = 1.5 * max_arm_length
-            self.viewer.set_bounds(-bounds, bounds, -bounds, bounds)
+        # Goal arm (transparent blue)
+        gx1 = self.l1 * np.cos(self.goal_q[0])
+        gy1 = self.l1 * np.sin(self.goal_q[0])
+        gx2 = gx1 + self.l2 * np.cos(self.goal_q[0] + self.goal_q[1])
+        gy2 = gy1 + self.l2 * np.sin(self.goal_q[0] + self.goal_q[1])
+        ax.plot([0, gx1], [0, gy1], 'b-', linewidth=4, alpha=0.25)
+        ax.plot([gx1, gx2], [gy1, gy2], 'b-', linewidth=3, alpha=0.25)
 
-        # add goal geoms
-        link1_goal = rendering.FilledPolygon([(l, b), (l, t), (r, t), (r, b)])
-        link1_goal_transform = rendering.Transform(
-            rotation=self.goal_q[0], scale=(self.l1, 1.0)
-        )
-        link1_goal.add_attr(link1_goal_transform)
-        link1_goal._color.vec4 = (1.0, 0.0, 0.0, 0.25)
-        self.viewer.add_onetime(link1_goal)
+        # Current arm (red)
+        x1 = self.l1 * np.cos(self.q[0])
+        y1 = self.l1 * np.sin(self.q[0])
+        x2 = x1 + self.l2 * np.cos(self.q[0] + self.q[1])
+        y2 = y1 + self.l2 * np.sin(self.q[0] + self.q[1])
+        ax.plot([0, x1], [0, y1], 'r-', linewidth=4)
+        ax.plot([x1, x2], [y1, y2], 'r-', linewidth=3)
 
-        p1_goal = [
-            self.l1 * np.cos(self.goal_q[0]),
-            self.l1 * np.sin(self.goal_q[0]),
-        ]
+        # Joints
+        ax.plot(0, 0, 'ko', markersize=8)
+        ax.plot(x1, y1, 'ko', markersize=6)
+        ax.plot(x2, y2, 'go', markersize=8)
+        ax.plot(gx2, gy2, 'b*', markersize=10, alpha=0.5)
 
-        link2_goal = rendering.FilledPolygon([(l, b), (l, t), (r, t), (r, b)])
-        link2_goal_transform = rendering.Transform(
-            rotation=self.goal_q[0] + self.goal_q[1],
-            translation=tuple(p1_goal),
-            scale=(self.l2, 1.0),
-        )
-        link2_goal.add_attr(link2_goal_transform)
-        link2_goal._color.vec4 = (0.0, 0.0, 1.0, 0.25)
-        self.viewer.add_onetime(link2_goal)
-
-        p1 = [self.l1 * np.cos(self.q[0]), self.l1 * np.sin(self.q[0])]
-
-        # add the arm geoms
-        link1 = self.viewer.draw_polygon([(l, b), (l, t), (r, t), (r, b)])
-        link1_transform = rendering.Transform(rotation=self.q[0], scale=(self.l1, 1.0))
-        link1.add_attr(link1_transform)
-        link1.set_color(1.0, 0.0, 0.0)
-
-        link2 = self.viewer.draw_polygon([(l, b), (l, t), (r, t), (r, b)])
-        link2_transform = rendering.Transform(
-            rotation=self.q[0] + self.q[1], translation=tuple(p1), scale=(self.l2, 1.0)
-        )
-        link2.add_attr(link2_transform)
-        link2.set_color(0.0, 0.0, 1.0)
-
-        return self.viewer.render(return_rgb_array=(mode == "rgb_array"))
+        if mode == "rgb_array":
+            fig.canvas.draw()
+            frame = np.asarray(fig.canvas.buffer_rgba())[:, :, :3]  # RGBA -> RGB
+            plt.close(fig)
+            return frame
+        else:
+            plt.close(fig)
+            return None
 
     def close(self):
-        if self.viewer is not None:
-            viewer = self.viewer
-            self.viewer = None
-            _patch_gym_viewer_close()
-            viewer.close()
+        pass
 
 
 class LimitedTorqueTwoLinkArmEnv(TwoLinkArmEnv):

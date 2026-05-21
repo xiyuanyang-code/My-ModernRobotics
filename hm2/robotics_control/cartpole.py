@@ -8,7 +8,7 @@ from pathlib import Path
 import re
 from typing import Tuple
 
-import gym
+import gymnasium as gym
 import numpy as np
 
 
@@ -167,14 +167,9 @@ class SwingUpStabilizeCartPoleEnv(gym.Env):
     def _angle_normalize(theta: float) -> float:
         return ((theta + math.pi) % (2.0 * math.pi)) - math.pi
 
-    def seed(self, seed=None):
-        self.np_random, seed = gym.utils.seeding.np_random(seed)
-        return [seed]
-
-    def reset(self, **kwargs):
-        seed = kwargs.pop("seed", None)
+    def reset(self, *, seed=None, options=None):
         if seed is not None:
-            self.seed(seed)
+            self.np_random, _ = gym.utils.seeding.np_random(seed)
         x = self.np_random.uniform(*self.init_x_range)
         x_dot = self.np_random.uniform(*self.init_x_dot_range)
         theta = math.pi + self.np_random.uniform(
@@ -183,7 +178,7 @@ class SwingUpStabilizeCartPoleEnv(gym.Env):
         theta_dot = self.np_random.uniform(*self.init_theta_dot_range)
         self.state = np.array([x, x_dot, theta, theta_dot], dtype=np.float64)
         self.steps = 0
-        return self.state.astype(np.float32)
+        return self.state.astype(np.float32), {}
 
     def step(self, action):
         x, x_dot, theta, theta_dot = self.state
@@ -225,7 +220,8 @@ class SwingUpStabilizeCartPoleEnv(gym.Env):
         ):
             reward += 2.0
 
-        done = bool(abs(x) > self.x_threshold or self.steps >= self.max_episode_steps)
+        terminated = bool(abs(x) > self.x_threshold or self.steps >= self.max_episode_steps)
+        truncated = False
         info = {
             "theta_error": float(theta_err),
             "x": float(x),
@@ -235,14 +231,14 @@ class SwingUpStabilizeCartPoleEnv(gym.Env):
                 abs(theta_err) < math.radians(10.0) and abs(theta_dot) < 0.4
             ),
         }
-        return self.state.astype(np.float32), float(reward), done, info
+        return self.state.astype(np.float32), float(reward), terminated, truncated, info
 
-    def render(self, mode="human"):
-        # Reuse Gym CartPole renderer by syncing temporary env state.
-        from gym.envs.classic_control.cartpole import CartPoleEnv
+    def render(self):
+        # Reuse Gymnasium CartPole renderer by syncing temporary env state.
+        from gymnasium.envs.classic_control.cartpole import CartPoleEnv
 
         if not hasattr(self, "_render_env"):
-            self._render_env = CartPoleEnv(render_mode=mode)
+            self._render_env = CartPoleEnv(render_mode=self.render_mode or "rgb_array")
         self._render_env.state = self.state.copy()
         return self._render_env.render()
 
@@ -306,10 +302,9 @@ class UprightStabilizeCartPoleEnv(SwingUpStabilizeCartPoleEnv):
         self.init_theta_max_rad = math.radians(float(init_theta_max_deg))
         self.down_theta_noise = 0.0  # Disable inherited down-hanging reset behavior.
 
-    def reset(self, **kwargs):
-        seed = kwargs.pop("seed", None)
+    def reset(self, *, seed=None, options=None):
         if seed is not None:
-            self.seed(seed)
+            self.np_random, _ = gym.utils.seeding.np_random(seed)
         x = self.np_random.uniform(*self.init_x_range)
         x_dot = self.np_random.uniform(*self.init_x_dot_range)
         theta = self.np_random.uniform(
@@ -318,4 +313,4 @@ class UprightStabilizeCartPoleEnv(SwingUpStabilizeCartPoleEnv):
         theta_dot = self.np_random.uniform(*self.init_theta_dot_range)
         self.state = np.array([x, x_dot, theta, theta_dot], dtype=np.float64)
         self.steps = 0
-        return self.state.astype(np.float32)
+        return self.state.astype(np.float32), {}
