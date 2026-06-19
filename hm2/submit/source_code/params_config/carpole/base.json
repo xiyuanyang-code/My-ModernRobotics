@@ -1,0 +1,11 @@
+{
+    "theta_kp": 46,
+    "theta_kd": 11,
+    "theta_ki": 0.0,
+    "x_kp": 3.2,
+    "x_kd": 5,
+    "x_ki": 0.3,
+    "force_limit": 10.0,
+    "integral_limit": 5.0,
+    "hysteresis": 1.5
+}
