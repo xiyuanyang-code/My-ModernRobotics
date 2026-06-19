@@ -65,9 +65,16 @@ def build_checkerboard_object_points(
     """
     cols, rows = checkerboard_size
 
-    # TODO(student): implement this function.
-    # Hint: use np.mgrid[0:cols, 0:rows].T.reshape(-1, 2).
-    raise NotImplementedError("build_checkerboard_object_points is not implemented")
+    # Generate (x, y) grid indices for all inner corners.
+    # np.mgrid[0:cols, 0:rows] produces two arrays of shape (cols, rows);
+    # transpose to (rows, cols) then reshape to (cols*rows, 2).
+    grid = np.mgrid[0:cols, 0:rows].T.reshape(-1, 2)  # shape (cols*rows, 2)
+    # Scale by square_size and append z=0 column.
+    object_points = np.hstack(
+        [grid.astype(np.float64) * square_size,
+         np.zeros((cols * rows, 1), dtype=np.float64)]
+    )
+    return object_points
 
 
 def project_points(
@@ -116,12 +123,18 @@ def compute_reprojection_error(
         mean_error: Mean reprojection error in pixels over all points.
         per_view_errors: One mean error per image.
     """
-    # TODO(student): implement this function.
-    # Hint:
-    # 1. Use project_points(...) to project object_points for each view.
-    # 2. Compare projected 2D points with detected image points.
-    # 3. Return mean Euclidean pixel error.
-    raise NotImplementedError("compute_reprojection_error is not implemented")
+    per_view_errors: list[float] = []
+    for obj_pts, img_pts, rvec, tvec in zip(
+        object_points_list, image_points_list, rvecs, tvecs
+    ):
+        # Project 3D object points back into the image.
+        projected = project_points(obj_pts, rvec, tvec, K, dist)
+        # Euclidean pixel error per point, then mean for this view.
+        errors = np.linalg.norm(projected - img_pts.reshape(-1, 2), axis=1)
+        per_view_errors.append(float(np.mean(errors)))
+
+    mean_error = float(np.mean(per_view_errors))
+    return mean_error, per_view_errors
 
 
 def undistort_image(image: np.ndarray, camera: CameraParameters) -> np.ndarray:

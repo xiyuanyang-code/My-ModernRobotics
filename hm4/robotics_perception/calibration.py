@@ -120,13 +120,27 @@ def calibrate_single_camera(
     if len(object_points_list) < 5:
         raise ValueError("At least 5 valid calibration images are recommended.")
 
-    # TODO(student): implement camera calibration.
-    # Hint:
-    #   ret, K, dist, rvecs, tvecs = cv2.calibrateCamera(...)
-    #   camera = CameraParameters(K=K, dist=dist, image_size=image_size)
-    #   mean_error, per_view_errors = compute_reprojection_error(...)
-    #   return camera, rvecs, tvecs, mean_error, per_view_errors
-    raise NotImplementedError("calibrate_single_camera is not implemented")
+    # Run OpenCV's camera calibration (Zhang's method with nonlinear refinement).
+    # OpenCV expects object points as float32 and image points as float32.
+    obj_pts_f32 = [pts.astype(np.float32) for pts in object_points_list]
+    img_pts_f32 = [pts.astype(np.float32) for pts in image_points_list]
+    ret, K, dist, rvecs, tvecs = cv2.calibrateCamera(
+        obj_pts_f32,
+        img_pts_f32,
+        image_size,
+        None,  # camera matrix hint (None = auto)
+        None,  # distortion hint (None = auto)
+    )
+
+    # Wrap into a CameraParameters dataclass.
+    camera = CameraParameters(K=K, dist=dist, image_size=image_size)
+
+    # Compute reprojection error for reporting.
+    mean_error, per_view_errors = compute_reprojection_error(
+        object_points_list, image_points_list, rvecs, tvecs, K, dist
+    )
+
+    return camera, rvecs, tvecs, mean_error, per_view_errors
 
 
 def save_calibration_npz(

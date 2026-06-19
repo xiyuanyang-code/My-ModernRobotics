@@ -1,0 +1,259 @@
+diff --git a/hm4/.gitignore b/hm4/.gitignore
+index 67f73b0..251ccdf 100644
+--- a/hm4/.gitignore
++++ b/hm4/.gitignore
+@@ -1,4 +1,6 @@
+ HM.md
+ *.pdf
+ 
+-sample_data
+\ No newline at end of file
++sample_data
++outputs
++papers
+\ No newline at end of file
+diff --git a/hm4/robotics_perception/calibration.py b/hm4/robotics_perception/calibration.py
+index 6fb88ad..b4a3b81 100644
+--- a/hm4/robotics_perception/calibration.py
++++ b/hm4/robotics_perception/calibration.py
+@@ -120,13 +120,27 @@ def calibrate_single_camera(
+     if len(object_points_list) < 5:
+         raise ValueError("At least 5 valid calibration images are recommended.")
+ 
+-    # TODO(student): implement camera calibration.
+-    # Hint:
+-    #   ret, K, dist, rvecs, tvecs = cv2.calibrateCamera(...)
+-    #   camera = CameraParameters(K=K, dist=dist, image_size=image_size)
+-    #   mean_error, per_view_errors = compute_reprojection_error(...)
+-    #   return camera, rvecs, tvecs, mean_error, per_view_errors
+-    raise NotImplementedError("calibrate_single_camera is not implemented")
++    # Run OpenCV's camera calibration (Zhang's method with nonlinear refinement).
++    # OpenCV expects object points as float32 and image points as float32.
++    obj_pts_f32 = [pts.astype(np.float32) for pts in object_points_list]
++    img_pts_f32 = [pts.astype(np.float32) for pts in image_points_list]
++    ret, K, dist, rvecs, tvecs = cv2.calibrateCamera(
++        obj_pts_f32,
++        img_pts_f32,
++        image_size,
++        None,  # camera matrix hint (None = auto)
++        None,  # distortion hint (None = auto)
++    )
++
++    # Wrap into a CameraParameters dataclass.
++    camera = CameraParameters(K=K, dist=dist, image_size=image_size)
++
++    # Compute reprojection error for reporting.
++    mean_error, per_view_errors = compute_reprojection_error(
++        object_points_list, image_points_list, rvecs, tvecs, K, dist
++    )
++
++    return camera, rvecs, tvecs, mean_error, per_view_errors
+ 
+ 
+ def save_calibration_npz(
+diff --git a/hm4/robotics_perception/camera_model.py b/hm4/robotics_perception/camera_model.py
+index bdd7ed5..5e33d50 100644
+--- a/hm4/robotics_perception/camera_model.py
++++ b/hm4/robotics_perception/camera_model.py
+@@ -65,9 +65,16 @@ def build_checkerboard_object_points(
+     """
+     cols, rows = checkerboard_size
+ 
+-    # TODO(student): implement this function.
+-    # Hint: use np.mgrid[0:cols, 0:rows].T.reshape(-1, 2).
+-    raise NotImplementedError("build_checkerboard_object_points is not implemented")
++    # Generate (x, y) grid indices for all inner corners.
++    # np.mgrid[0:cols, 0:rows] produces two arrays of shape (cols, rows);
++    # transpose to (rows, cols) then reshape to (cols*rows, 2).
++    grid = np.mgrid[0:cols, 0:rows].T.reshape(-1, 2)  # shape (cols*rows, 2)
++    # Scale by square_size and append z=0 column.
++    object_points = np.hstack(
++        [grid.astype(np.float64) * square_size,
++         np.zeros((cols * rows, 1), dtype=np.float64)]
++    )
++    return object_points
+ 
+ 
+ def project_points(
+@@ -116,12 +123,18 @@ def compute_reprojection_error(
+         mean_error: Mean reprojection error in pixels over all points.
+         per_view_errors: One mean error per image.
+     """
+-    # TODO(student): implement this function.
+-    # Hint:
+-    # 1. Use project_points(...) to project object_points for each view.
+-    # 2. Compare projected 2D points with detected image points.
+-    # 3. Return mean Euclidean pixel error.
+-    raise NotImplementedError("compute_reprojection_error is not implemented")
++    per_view_errors: list[float] = []
++    for obj_pts, img_pts, rvec, tvec in zip(
++        object_points_list, image_points_list, rvecs, tvecs
++    ):
++        # Project 3D object points back into the image.
++        projected = project_points(obj_pts, rvec, tvec, K, dist)
++        # Euclidean pixel error per point, then mean for this view.
++        errors = np.linalg.norm(projected - img_pts.reshape(-1, 2), axis=1)
++        per_view_errors.append(float(np.mean(errors)))
++
++    mean_error = float(np.mean(per_view_errors))
++    return mean_error, per_view_errors
+ 
+ 
+ def undistort_image(image: np.ndarray, camera: CameraParameters) -> np.ndarray:
+diff --git a/hm4/robotics_perception/stereo_calibration.py b/hm4/robotics_perception/stereo_calibration.py
+index e488367..b435c3b 100644
+--- a/hm4/robotics_perception/stereo_calibration.py
++++ b/hm4/robotics_perception/stereo_calibration.py
+@@ -92,12 +92,45 @@ def calibrate_stereo_camera(
+       2. Calibrate right camera.
+       3. Run cv2.stereoCalibrate with fixed intrinsics.
+     """
+-    # TODO(student): implement stereo calibration.
+-    # Hint:
+-    #   - Use cv2.calibrateCamera for left and right cameras.
+-    #   - Use cv2.stereoCalibrate with cv2.CALIB_FIX_INTRINSIC.
+-    #   - Return StereoParameters(...).
+-    raise NotImplementedError("calibrate_stereo_camera is not implemented")
++    # Ensure float32 for OpenCV compatibility.
++    obj_f32 = [pts.astype(np.float32) for pts in object_points_list]
++    left_f32 = [pts.astype(np.float32) for pts in left_points_list]
++    right_f32 = [pts.astype(np.float32) for pts in right_points_list]
++
++    # 1. Calibrate left and right cameras independently.
++    _, K_left, dist_left, _, _ = cv2.calibrateCamera(
++        obj_f32, left_f32, image_size, None, None
++    )
++    _, K_right, dist_right, _, _ = cv2.calibrateCamera(
++        obj_f32, right_f32, image_size, None, None
++    )
++
++    # 2. Stereo calibration with fixed intrinsics.
++    flags = cv2.CALIB_FIX_INTRINSIC
++    ret, K_left, dist_left, K_right, dist_right, R, T, E, F = cv2.stereoCalibrate(
++        obj_f32,
++        left_f32,
++        right_f32,
++        K_left,
++        dist_left,
++        K_right,
++        dist_right,
++        image_size,
++        flags=flags,
++    )
++
++    left_cam = CameraParameters(K=K_left, dist=dist_left, image_size=image_size)
++    right_cam = CameraParameters(K=K_right, dist=dist_right, image_size=image_size)
++
++    return StereoParameters(
++        left=left_cam,
++        right=right_cam,
++        R=R,
++        T=T,
++        E=E,
++        F=F,
++        image_size=image_size,
++    )
+ 
+ 
+ def stereo_rectify(
+@@ -108,9 +141,24 @@ def stereo_rectify(
+     Suggested return format:
+         R1, R2, P1, P2, Q, map1_left, map2_left, map1_right, map2_right
+     """
+-    # TODO(student): implement cv2.stereoRectify and cv2.initUndistortRectifyMap.
+-    # You may change the return type if you document it clearly.
+-    raise NotImplementedError("stereo_rectify is not implemented")
++    # Compute rectification rotation matrices and projection matrices.
++    R1, R2, P1, P2, Q, _, _ = cv2.stereoRectify(
++        stereo.left.K, stereo.left.dist,
++        stereo.right.K, stereo.right.dist,
++        stereo.image_size,
++        stereo.R, stereo.T,
++        alpha=0,  # crop to valid pixels
++    )
++
++    # Compute rectification maps for both cameras.
++    map1_left, map2_left = cv2.initUndistortRectifyMap(
++        stereo.left.K, stereo.left.dist, R1, P1, stereo.image_size, cv2.CV_32FC1
++    )
++    map1_right, map2_right = cv2.initUndistortRectifyMap(
++        stereo.right.K, stereo.right.dist, R2, P2, stereo.image_size, cv2.CV_32FC1
++    )
++
++    return R1, R2, P1, P2, Q, map1_left, map2_left, map1_right, map2_right
+ 
+ 
+ def rectify_pair(
+@@ -139,12 +187,38 @@ def compute_disparity_sgbm(
+     Returns:
+         disparity: Floating-point disparity map in pixels.
+     """
+-    # TODO(student): implement StereoSGBM disparity computation.
+-    # Hint:
+-    #   - Convert images to grayscale.
+-    #   - num_disparities must be divisible by 16.
+-    #   - OpenCV returns fixed-point disparity scaled by 16.
+-    raise NotImplementedError("compute_disparity_sgbm is not implemented")
++    # Convert to grayscale if needed.
++    if rectified_left.ndim == 3:
++        gray_l = cv2.cvtColor(rectified_left, cv2.COLOR_BGR2GRAY)
++    else:
++        gray_l = rectified_left
++    if rectified_right.ndim == 3:
++        gray_r = cv2.cvtColor(rectified_right, cv2.COLOR_BGR2GRAY)
++    else:
++        gray_r = rectified_right
++
++    # Ensure num_disparities is divisible by 16.
++    num_disparities = max(16, (num_disparities // 16) * 16)
++
++    stereo = cv2.StereoSGBM_create(
++        minDisparity=min_disparity,
++        numDisparities=num_disparities,
++        blockSize=block_size,
++        P1=8 * 3 * block_size ** 2,
++        P2=32 * 3 * block_size ** 2,
++        disp12MaxDiff=1,
++        uniquenessRatio=10,
++        speckleWindowSize=100,
++        speckleRange=32,
++        preFilterCap=63,
++        mode=cv2.STEREO_SGBM_MODE_SGBM_3WAY,
++    )
++
++    # OpenCV returns fixed-point disparity scaled by 16.
++    disparity_fixed = stereo.compute(gray_l, gray_r)
++    disparity = disparity_fixed.astype(np.float32) / 16.0
++
++    return disparity
+ 
+ 
+ def disparity_to_depth(disparity: np.ndarray, fx: float, baseline: float) -> np.ndarray:
+@@ -152,5 +226,7 @@ def disparity_to_depth(disparity: np.ndarray, fx: float, baseline: float) -> np.
+ 
+     Invalid or non-positive disparity should be assigned np.nan or zero.
+     """
+-    # TODO(student): implement disparity-to-depth conversion.
+-    raise NotImplementedError("disparity_to_depth is not implemented")
++    depth = np.full_like(disparity, np.nan, dtype=np.float64)
++    valid = disparity > 0
++    depth[valid] = (fx * baseline) / disparity[valid]
++    return depth
+diff --git a/pyproject.toml b/pyproject.toml
+index af0ce85..2eeffe4 100644
+--- a/pyproject.toml
++++ b/pyproject.toml
+@@ -7,9 +7,12 @@ requires-python = ">=3.10"
+ dependencies = [
+     "matplotlib>=3.10.8",
+     "numpy>=2.2.6",
++    "opencv-python>=4.13.0.92",
++    "pytest>=9.1.0",
++    "pyyaml>=6.0.3",
+     "roboticstoolbox-python>=1.1.1",
+ ]
+ 
+ [[tool.uv.index]]
+-url = "https://mirrors.aliyun.com/pypi/simple"
++url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+ default = true

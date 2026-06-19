@@ -92,12 +92,45 @@ def calibrate_stereo_camera(
       2. Calibrate right camera.
       3. Run cv2.stereoCalibrate with fixed intrinsics.
     """
-    # TODO(student): implement stereo calibration.
-    # Hint:
-    #   - Use cv2.calibrateCamera for left and right cameras.
-    #   - Use cv2.stereoCalibrate with cv2.CALIB_FIX_INTRINSIC.
-    #   - Return StereoParameters(...).
-    raise NotImplementedError("calibrate_stereo_camera is not implemented")
+    # Ensure float32 for OpenCV compatibility.
+    obj_f32 = [pts.astype(np.float32) for pts in object_points_list]
+    left_f32 = [pts.astype(np.float32) for pts in left_points_list]
+    right_f32 = [pts.astype(np.float32) for pts in right_points_list]
+
+    # 1. Calibrate left and right cameras independently.
+    _, K_left, dist_left, _, _ = cv2.calibrateCamera(
+        obj_f32, left_f32, image_size, None, None
+    )
+    _, K_right, dist_right, _, _ = cv2.calibrateCamera(
+        obj_f32, right_f32, image_size, None, None
+    )
+
+    # 2. Stereo calibration with fixed intrinsics.
+    flags = cv2.CALIB_FIX_INTRINSIC
+    ret, K_left, dist_left, K_right, dist_right, R, T, E, F = cv2.stereoCalibrate(
+        obj_f32,
+        left_f32,
+        right_f32,
+        K_left,
+        dist_left,
+        K_right,
+        dist_right,
+        image_size,
+        flags=flags,
+    )
+
+    left_cam = CameraParameters(K=K_left, dist=dist_left, image_size=image_size)
+    right_cam = CameraParameters(K=K_right, dist=dist_right, image_size=image_size)
+
+    return StereoParameters(
+        left=left_cam,
+        right=right_cam,
+        R=R,
+        T=T,
+        E=E,
+        F=F,
+        image_size=image_size,
+    )
 
 
 def stereo_rectify(
@@ -108,9 +141,24 @@ def stereo_rectify(
     Suggested return format:
         R1, R2, P1, P2, Q, map1_left, map2_left, map1_right, map2_right
     """
-    # TODO(student): implement cv2.stereoRectify and cv2.initUndistortRectifyMap.
-    # You may change the return type if you document it clearly.
-    raise NotImplementedError("stereo_rectify is not implemented")
+    # Compute rectification rotation matrices and projection matrices.
+    R1, R2, P1, P2, Q, _, _ = cv2.stereoRectify(
+        stereo.left.K, stereo.left.dist,
+        stereo.right.K, stereo.right.dist,
+        stereo.image_size,
+        stereo.R, stereo.T,
+        alpha=0,  # crop to valid pixels
+    )
+
+    # Compute rectification maps for both cameras.
+    map1_left, map2_left = cv2.initUndistortRectifyMap(
+        stereo.left.K, stereo.left.dist, R1, P1, stereo.image_size, cv2.CV_32FC1
+    )
+    map1_right, map2_right = cv2.initUndistortRectifyMap(
+        stereo.right.K, stereo.right.dist, R2, P2, stereo.image_size, cv2.CV_32FC1
+    )
+
+    return R1, R2, P1, P2, Q, map1_left, map2_left, map1_right, map2_right
 
 
 def rectify_pair(
@@ -139,12 +187,38 @@ def compute_disparity_sgbm(
     Returns:
         disparity: Floating-point disparity map in pixels.
     """
-    # TODO(student): implement StereoSGBM disparity computation.
-    # Hint:
-    #   - Convert images to grayscale.
-    #   - num_disparities must be divisible by 16.
-    #   - OpenCV returns fixed-point disparity scaled by 16.
-    raise NotImplementedError("compute_disparity_sgbm is not implemented")
+    # Convert to grayscale if needed.
+    if rectified_left.ndim == 3:
+        gray_l = cv2.cvtColor(rectified_left, cv2.COLOR_BGR2GRAY)
+    else:
+        gray_l = rectified_left
+    if rectified_right.ndim == 3:
+        gray_r = cv2.cvtColor(rectified_right, cv2.COLOR_BGR2GRAY)
+    else:
+        gray_r = rectified_right
+
+    # Ensure num_disparities is divisible by 16.
+    num_disparities = max(16, (num_disparities // 16) * 16)
+
+    stereo = cv2.StereoSGBM_create(
+        minDisparity=min_disparity,
+        numDisparities=num_disparities,
+        blockSize=block_size,
+        P1=8 * 3 * block_size ** 2,
+        P2=32 * 3 * block_size ** 2,
+        disp12MaxDiff=1,
+        uniquenessRatio=10,
+        speckleWindowSize=100,
+        speckleRange=32,
+        preFilterCap=63,
+        mode=cv2.STEREO_SGBM_MODE_SGBM_3WAY,
+    )
+
+    # OpenCV returns fixed-point disparity scaled by 16.
+    disparity_fixed = stereo.compute(gray_l, gray_r)
+    disparity = disparity_fixed.astype(np.float32) / 16.0
+
+    return disparity
 
 
 def disparity_to_depth(disparity: np.ndarray, fx: float, baseline: float) -> np.ndarray:
@@ -152,5 +226,7 @@ def disparity_to_depth(disparity: np.ndarray, fx: float, baseline: float) -> np.
 
     Invalid or non-positive disparity should be assigned np.nan or zero.
     """
-    # TODO(student): implement disparity-to-depth conversion.
-    raise NotImplementedError("disparity_to_depth is not implemented")
+    depth = np.full_like(disparity, np.nan, dtype=np.float64)
+    valid = disparity > 0
+    depth[valid] = (fx * baseline) / disparity[valid]
+    return depth
